@@ -1,4 +1,14 @@
+const connectEvents = ["gamepadconnected", "mozgamepadconnected", "webkitgamepadconnected"];
+const disconnectEvents = ["gamepaddisconnected", "mozgamepaddisconnected", "webkitgamepaddisconnected"];
+
 class GameBoyAdvanceKeypad {
+	static KEY_OFFSET = 0x03ff;
+	get currentDown() {
+		return Object.values(this.pressedKeys).reduce((acc, value) => acc & ~value, GameBoyAdvanceKeypad.KEY_OFFSET);
+	}
+
+	pressedKeys = { keyboard: 0 }
+
 	constructor() {
 		this.KEYCODE_LEFT = 37;
 		this.KEYCODE_UP = 38;
@@ -11,18 +21,6 @@ class GameBoyAdvanceKeypad {
 		this.KEYCODE_L = 65;
 		this.KEYCODE_R = 83;
 
-		this.GAMEPAD_LEFT = 14;
-		this.GAMEPAD_UP = 12;
-		this.GAMEPAD_RIGHT = 15;
-		this.GAMEPAD_DOWN = 13;
-		this.GAMEPAD_START = 9;
-		this.GAMEPAD_SELECT = 8;
-		this.GAMEPAD_A = 1;
-		this.GAMEPAD_B = 0;
-		this.GAMEPAD_L = 4;
-		this.GAMEPAD_R = 5;
-		this.GAMEPAD_THRESHOLD = 0.2;
-
 		this.A = 0;
 		this.B = 1;
 		this.SELECT = 2;
@@ -34,7 +32,6 @@ class GameBoyAdvanceKeypad {
 		this.R = 8;
 		this.L = 9;
 
-		this.currentDown = 0x03ff;
 		this.eatInput = false;
 
 		this.gamepads = [];
@@ -49,7 +46,7 @@ class GameBoyAdvanceKeypad {
 			this.remapKeycode(this.remappingKeyId, e.keyCode);
 			this.remappingKeyId = "";
 			e.preventDefault();
-			return; // Could do an else and wrap the rest of the function in it, but this is cleaner
+			return;
 		}
 
 		switch (e.keyCode) {
@@ -88,50 +85,50 @@ class GameBoyAdvanceKeypad {
 		}
 
 		toggle = 1 << toggle;
-		if (e.type == "keydown") {
-			this.currentDown &= ~toggle;
+		if (e.type === "keydown") {
+			this.pressedKeys["keyboard"] |= toggle;
 		} else {
-			this.currentDown |= toggle;
+			this.pressedKeys["keyboard"] &= ~toggle;
 		}
 
 		if (this.eatInput) {
 			e.preventDefault();
 		}
 	}
-	gamepadHandler(gamepad) {
+	gamepadHandler(gamepad, map) {
 		var value = 0;
-		if (gamepad.buttons[this.GAMEPAD_LEFT] > this.GAMEPAD_THRESHOLD) {
+		if (gamepad.buttons[map.GAMEPAD_LEFT].value > map.GAMEPAD_THRESHOLD) {
 			value |= 1 << this.LEFT;
 		}
-		if (gamepad.buttons[this.GAMEPAD_UP] > this.GAMEPAD_THRESHOLD) {
+		if (gamepad.buttons[map.GAMEPAD_UP].value > map.GAMEPAD_THRESHOLD) {
 			value |= 1 << this.UP;
 		}
-		if (gamepad.buttons[this.GAMEPAD_RIGHT] > this.GAMEPAD_THRESHOLD) {
+		if (gamepad.buttons[map.GAMEPAD_RIGHT].value > map.GAMEPAD_THRESHOLD) {
 			value |= 1 << this.RIGHT;
 		}
-		if (gamepad.buttons[this.GAMEPAD_DOWN] > this.GAMEPAD_THRESHOLD) {
+		if (gamepad.buttons[map.GAMEPAD_DOWN].value > map.GAMEPAD_THRESHOLD) {
 			value |= 1 << this.DOWN;
 		}
-		if (gamepad.buttons[this.GAMEPAD_START] > this.GAMEPAD_THRESHOLD) {
+		if (gamepad.buttons[map.GAMEPAD_START].value > map.GAMEPAD_THRESHOLD) {
 			value |= 1 << this.START;
 		}
-		if (gamepad.buttons[this.GAMEPAD_SELECT] > this.GAMEPAD_THRESHOLD) {
+		if (gamepad.buttons[map.GAMEPAD_SELECT].value > map.GAMEPAD_THRESHOLD) {
 			value |= 1 << this.SELECT;
 		}
-		if (gamepad.buttons[this.GAMEPAD_A] > this.GAMEPAD_THRESHOLD) {
+		if (gamepad.buttons[map.GAMEPAD_A].value > map.GAMEPAD_THRESHOLD) {
 			value |= 1 << this.A;
 		}
-		if (gamepad.buttons[this.GAMEPAD_B] > this.GAMEPAD_THRESHOLD) {
+		if (gamepad.buttons[map.GAMEPAD_B].value > map.GAMEPAD_THRESHOLD) {
 			value |= 1 << this.B;
 		}
-		if (gamepad.buttons[this.GAMEPAD_L] > this.GAMEPAD_THRESHOLD) {
+		if (gamepad.buttons[map.GAMEPAD_L].value > map.GAMEPAD_THRESHOLD) {
 			value |= 1 << this.L;
 		}
-		if (gamepad.buttons[this.GAMEPAD_R] > this.GAMEPAD_THRESHOLD) {
+		if (gamepad.buttons[map.GAMEPAD_R].value > map.GAMEPAD_THRESHOLD) {
 			value |= 1 << this.R;
 		}
 
-		this.currentDown = ~value & 0x3ff;
+		this.pressedKeys[gamepad.id] = value;
 	}
 	gamepadConnectHandler(gamepad) {
 		this.gamepads.push(gamepad);
@@ -142,14 +139,9 @@ class GameBoyAdvanceKeypad {
 		});
 	}
 	pollGamepads() {
-		var navigatorList = [];
-		if (navigator.webkitGetGamepads) {
-			navigatorList = navigator.webkitGetGamepads();
-		} else if (navigator.getGamepads) {
-			navigatorList = navigator.getGamepads();
-		}
+		const navigatorList = navigator?.getGamepads() || navigator?.webkitGetGamepads();
 
-		// Let's all give a shout out to Chrome for making us get the gamepads EVERY FRAME
+		// Let"s all give a shout out to Chrome for making us get the gamepads EVERY FRAME
 		/* How big of a performance draw is this? Would it be worth letting users know? */
 		if (navigatorList.length) {
 			this.gamepads = [];
@@ -159,49 +151,22 @@ class GameBoyAdvanceKeypad {
 				this.gamepads.push(navigatorList[i]);
 			}
 		}
-		if (this.gamepads.length > 0) {
-			this.gamepadHandler(this.gamepads[0]);
-		}
+		this.gamepads.forEach(
+			gamepad => { this.gamepadHandler(gamepad, gamepadMaps[gamepad.id] || gamepadMaps["default"]); }
+		);
 	}
 	registerHandlers() {
-		window.addEventListener(
-			"keydown",
-			this.keyboardHandler.bind(this),
-			true
-		);
+		window.addEventListener("keydown", this.keyboardHandler.bind(this), true);
 		window.addEventListener("keyup", this.keyboardHandler.bind(this), true);
 
-		window.addEventListener(
-			"gamepadconnected",
-			this.gamepadConnectHandler.bind(this),
-			true
-		);
-		window.addEventListener(
-			"mozgamepadconnected",
-			this.gamepadConnectHandler.bind(this),
-			true
-		);
-		window.addEventListener(
-			"webkitgamepadconnected",
-			this.gamepadConnectHandler.bind(this),
-			true
-		);
+		const boundGamepadConnectHandler = this.gamepadConnectHandler.bind(this);
+		connectEvents
+			.forEach(event => { window.addEventListener(event, boundGamepadConnectHandler, true); });
 
-		window.addEventListener(
-			"gamepaddisconnected",
-			this.gamepadDisconnectHandler.bind(this),
-			true
-		);
-		window.addEventListener(
-			"mozgamepaddisconnected",
-			this.gamepadDisconnectHandler.bind(this),
-			true
-		);
-		window.addEventListener(
-			"webkitgamepaddisconnected",
-			this.gamepadDisconnectHandler.bind(this),
-			true
-		);
+		const boundGamepadDisconnectHandler = this.gamepadConnectHandler.bind(this);
+		disconnectEvents
+			.forEach(event => { window.addEventListener(event, boundGamepadDisconnectHandler, true); });
+
 	}
 	// keyId is ["A", "B", "SELECT", "START", "RIGHT", "LEFT", "UP", "DOWN", "R", "L"]
 	initKeycodeRemap(keyId) {
@@ -249,3 +214,46 @@ class GameBoyAdvanceKeypad {
 		}
 	}
 }
+
+const gamepadMaps = {
+	"default": {		
+		GAMEPAD_LEFT: 14,
+		GAMEPAD_UP: 12,
+		GAMEPAD_RIGHT: 15,
+		GAMEPAD_DOWN: 13,
+		GAMEPAD_START: 9,
+		GAMEPAD_SELECT: 8,
+		GAMEPAD_A: 1,
+		GAMEPAD_B: 0,
+		GAMEPAD_L: 4,
+		GAMEPAD_R: 5,
+		GAMEPAD_THRESHOLD: 0.2
+	},
+	"Xbox Wireless Controller Extended Gamepad": {		
+		GAMEPAD_LEFT: 14,
+		GAMEPAD_UP: 12,
+		GAMEPAD_RIGHT: 15,
+		GAMEPAD_DOWN: 13,
+		GAMEPAD_START: 9,
+		GAMEPAD_SELECT: 8,
+		GAMEPAD_A: 0,
+		GAMEPAD_B: 1,
+		GAMEPAD_L: 4,
+		GAMEPAD_R: 5,
+		GAMEPAD_THRESHOLD: 0.2
+	},
+	"Wireless Controller Extended Gamepad": {
+	// Also known as DualShock 4
+		GAMEPAD_LEFT: 14,
+		GAMEPAD_UP: 12,
+		GAMEPAD_RIGHT: 15,
+		GAMEPAD_DOWN: 13,
+		GAMEPAD_START: 9,
+		GAMEPAD_SELECT: 8,
+		GAMEPAD_A: 0,
+		GAMEPAD_B: 1,
+		GAMEPAD_L: 4,
+		GAMEPAD_R: 5,
+		GAMEPAD_THRESHOLD: 0.2
+	}
+};
