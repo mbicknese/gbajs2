@@ -94,9 +94,7 @@ class ARMCore {
 		this.step = function () {
 			var instruction =
 				this.instruction ||
-				(this.instruction = this.loadInstruction(
-					gprs[this.PC] - this.instructionWidth
-				));
+				(this.instruction = this.loadInstruction(gprs[this.PC] - this.instructionWidth));
 			gprs[this.PC] += this.instructionWidth;
 			this.conditionPassed = true;
 			instruction();
@@ -104,10 +102,7 @@ class ARMCore {
 			if (!instruction.writesPC) {
 				if (this.instruction != null) {
 					// We might have gotten an interrupt from the instruction
-					if (
-						instruction.next == null ||
-						instruction.next.page.invalid
-					) {
+					if (instruction.next == null || instruction.next.page.invalid) {
 						instruction.next = this.loadInstruction(
 							gprs[this.PC] - this.instructionWidth
 						);
@@ -128,10 +123,7 @@ class ARMCore {
 					if (!instruction.fixedJump) {
 						this.instruction = null;
 					} else if (this.instruction != null) {
-						if (
-							instruction.next == null ||
-							instruction.next.page.invalid
-						) {
+						if (instruction.next == null || instruction.next.page.invalid) {
 							instruction.next = this.loadInstruction(
 								gprs[this.PC] - this.instructionWidth
 							);
@@ -280,10 +272,7 @@ class ARMCore {
 	}
 	fetchPage(address) {
 		var region = address >> this.mmu.BASE_OFFSET;
-		var pageId = this.mmu.addressToPage(
-			region,
-			address & this.mmu.OFFSET_MASK
-		);
+		var pageId = this.mmu.addressToPage(region, address & this.mmu.OFFSET_MASK);
 		if (region == this.pageRegion) {
 			if (pageId == this.pageId && !this.page.invalid) {
 				return;
@@ -348,7 +337,7 @@ class ARMCore {
 			case this.MODE_UNDEFINED:
 				return this.BANK_UNDEFINED;
 			default:
-				throw "Invalid user mode passed to selectBank";
+				throw 'Invalid user mode passed to selectBank';
 		}
 	}
 	switchExecMode(newMode) {
@@ -453,7 +442,7 @@ class ARMCore {
 	}
 	badOp(instruction) {
 		var func = function () {
-			throw "Illegal instruction: 0x" + instruction.toString(16);
+			throw 'Illegal instruction: 0x' + instruction.toString(16);
 		};
 		func.writesPC = true;
 		func.fixedJump = false;
@@ -512,13 +501,11 @@ class ARMCore {
 			},
 			// GT
 			function () {
-				return (cpu.conditionPassed =
-					!cpu.cpsrZ && !cpu.cpsrN == !cpu.cpsrV);
+				return (cpu.conditionPassed = !cpu.cpsrZ && !cpu.cpsrN == !cpu.cpsrV);
 			},
 			// LE
 			function () {
-				return (cpu.conditionPassed =
-					cpu.cpsrZ || !cpu.cpsrN != !cpu.cpsrV);
+				return (cpu.conditionPassed = cpu.cpsrZ || !cpu.cpsrN != !cpu.cpsrV);
 			},
 			// AL
 			null,
@@ -535,8 +522,7 @@ class ARMCore {
 				if (immediate) {
 					shiftOp = function () {
 						cpu.shifterOperand = gprs[rm] << immediate;
-						cpu.shifterCarryOut =
-							gprs[rm] & (1 << (32 - immediate));
+						cpu.shifterCarryOut = gprs[rm] & (1 << (32 - immediate));
 					};
 				} else {
 					// This boils down to no shift
@@ -583,15 +569,13 @@ class ARMCore {
 				if (immediate) {
 					shiftOp = function () {
 						cpu.shifterOperand =
-							(gprs[rm] >>> immediate) |
-							(gprs[rm] << (32 - immediate));
+							(gprs[rm] >>> immediate) | (gprs[rm] << (32 - immediate));
 						cpu.shifterCarryOut = gprs[rm] & (1 << (immediate - 1));
 					};
 				} else {
 					// RRX
 					shiftOp = function () {
-						cpu.shifterOperand =
-							(!!cpu.cpsrC << 31) | (gprs[rm] >>> 1);
+						cpu.shifterOperand = (!!cpu.cpsrC << 31) | (gprs[rm] >>> 1);
 						cpu.shifterCarryOut = gprs[rm] & 0x00000001;
 					};
 				}
@@ -626,16 +610,8 @@ class ARMCore {
 					var rm = instruction & 0x0000000f;
 					var immediate = instruction & 0x000000ff;
 					var rotateImm = (instruction & 0x00000f00) >> 7;
-					immediate =
-						(immediate >>> rotateImm) |
-						(immediate << (32 - rotateImm));
-					op = this.armCompiler.constructMSR(
-						rm,
-						r,
-						instruction,
-						immediate,
-						condOp
-					);
+					immediate = (immediate >>> rotateImm) | (immediate << (32 - rotateImm));
+					op = this.armCompiler.constructMSR(rm, r, instruction, immediate, condOp);
 					op.writesPC = false;
 				} else if ((instruction & 0x00bf0000) == 0x000f0000) {
 					// MRS
@@ -652,15 +628,13 @@ class ARMCore {
 				var shiftType = instruction & 0x00000060;
 				var rm = instruction & 0x0000000f;
 				var shiftOp = function () {
-					throw "BUG: invalid barrel shifter";
+					throw 'BUG: invalid barrel shifter';
 				};
 				if (instruction & 0x02000000) {
 					var immediate = instruction & 0x000000ff;
 					var rotate = (instruction & 0x00000f00) >> 7;
 					if (!rotate) {
-						shiftOp = this.armCompiler.constructAddressingMode1Immediate(
-							immediate
-						);
+						shiftOp = this.armCompiler.constructAddressingMode1Immediate(immediate);
 					} else {
 						shiftOp = this.armCompiler.constructAddressingMode1ImmediateRotate(
 							immediate,
@@ -673,293 +647,137 @@ class ARMCore {
 					switch (shiftType) {
 						case 0x00000000:
 							// LSL
-							shiftOp = this.armCompiler.constructAddressingMode1LSL(
-								rs,
-								rm
-							);
+							shiftOp = this.armCompiler.constructAddressingMode1LSL(rs, rm);
 							break;
 						case 0x00000020:
 							// LSR
-							shiftOp = this.armCompiler.constructAddressingMode1LSR(
-								rs,
-								rm
-							);
+							shiftOp = this.armCompiler.constructAddressingMode1LSR(rs, rm);
 							break;
 						case 0x00000040:
 							// ASR
-							shiftOp = this.armCompiler.constructAddressingMode1ASR(
-								rs,
-								rm
-							);
+							shiftOp = this.armCompiler.constructAddressingMode1ASR(rs, rm);
 							break;
 						case 0x00000060:
 							// ROR
-							shiftOp = this.armCompiler.constructAddressingMode1ROR(
-								rs,
-								rm
-							);
+							shiftOp = this.armCompiler.constructAddressingMode1ROR(rs, rm);
 							break;
 					}
 				} else {
 					var immediate = (instruction & 0x00000f80) >> 7;
-					shiftOp = this.barrelShiftImmediate(
-						shiftType,
-						immediate,
-						rm
-					);
+					shiftOp = this.barrelShiftImmediate(shiftType, immediate, rm);
 				}
 
 				switch (opcode) {
 					case 0x00000000:
 						// AND
 						if (s) {
-							op = this.armCompiler.constructANDS(
-								rd,
-								rn,
-								shiftOp,
-								condOp
-							);
+							op = this.armCompiler.constructANDS(rd, rn, shiftOp, condOp);
 						} else {
-							op = this.armCompiler.constructAND(
-								rd,
-								rn,
-								shiftOp,
-								condOp
-							);
+							op = this.armCompiler.constructAND(rd, rn, shiftOp, condOp);
 						}
 						break;
 					case 0x00200000:
 						// EOR
 						if (s) {
-							op = this.armCompiler.constructEORS(
-								rd,
-								rn,
-								shiftOp,
-								condOp
-							);
+							op = this.armCompiler.constructEORS(rd, rn, shiftOp, condOp);
 						} else {
-							op = this.armCompiler.constructEOR(
-								rd,
-								rn,
-								shiftOp,
-								condOp
-							);
+							op = this.armCompiler.constructEOR(rd, rn, shiftOp, condOp);
 						}
 						break;
 					case 0x00400000:
 						// SUB
 						if (s) {
-							op = this.armCompiler.constructSUBS(
-								rd,
-								rn,
-								shiftOp,
-								condOp
-							);
+							op = this.armCompiler.constructSUBS(rd, rn, shiftOp, condOp);
 						} else {
-							op = this.armCompiler.constructSUB(
-								rd,
-								rn,
-								shiftOp,
-								condOp
-							);
+							op = this.armCompiler.constructSUB(rd, rn, shiftOp, condOp);
 						}
 						break;
 					case 0x00600000:
 						// RSB
 						if (s) {
-							op = this.armCompiler.constructRSBS(
-								rd,
-								rn,
-								shiftOp,
-								condOp
-							);
+							op = this.armCompiler.constructRSBS(rd, rn, shiftOp, condOp);
 						} else {
-							op = this.armCompiler.constructRSB(
-								rd,
-								rn,
-								shiftOp,
-								condOp
-							);
+							op = this.armCompiler.constructRSB(rd, rn, shiftOp, condOp);
 						}
 						break;
 					case 0x00800000:
 						// ADD
 						if (s) {
-							op = this.armCompiler.constructADDS(
-								rd,
-								rn,
-								shiftOp,
-								condOp
-							);
+							op = this.armCompiler.constructADDS(rd, rn, shiftOp, condOp);
 						} else {
-							op = this.armCompiler.constructADD(
-								rd,
-								rn,
-								shiftOp,
-								condOp
-							);
+							op = this.armCompiler.constructADD(rd, rn, shiftOp, condOp);
 						}
 						break;
 					case 0x00a00000:
 						// ADC
 						if (s) {
-							op = this.armCompiler.constructADCS(
-								rd,
-								rn,
-								shiftOp,
-								condOp
-							);
+							op = this.armCompiler.constructADCS(rd, rn, shiftOp, condOp);
 						} else {
-							op = this.armCompiler.constructADC(
-								rd,
-								rn,
-								shiftOp,
-								condOp
-							);
+							op = this.armCompiler.constructADC(rd, rn, shiftOp, condOp);
 						}
 						break;
 					case 0x00c00000:
 						// SBC
 						if (s) {
-							op = this.armCompiler.constructSBCS(
-								rd,
-								rn,
-								shiftOp,
-								condOp
-							);
+							op = this.armCompiler.constructSBCS(rd, rn, shiftOp, condOp);
 						} else {
-							op = this.armCompiler.constructSBC(
-								rd,
-								rn,
-								shiftOp,
-								condOp
-							);
+							op = this.armCompiler.constructSBC(rd, rn, shiftOp, condOp);
 						}
 						break;
 					case 0x00e00000:
 						// RSC
 						if (s) {
-							op = this.armCompiler.constructRSCS(
-								rd,
-								rn,
-								shiftOp,
-								condOp
-							);
+							op = this.armCompiler.constructRSCS(rd, rn, shiftOp, condOp);
 						} else {
-							op = this.armCompiler.constructRSC(
-								rd,
-								rn,
-								shiftOp,
-								condOp
-							);
+							op = this.armCompiler.constructRSC(rd, rn, shiftOp, condOp);
 						}
 						break;
 					case 0x01000000:
 						// TST
-						op = this.armCompiler.constructTST(
-							rd,
-							rn,
-							shiftOp,
-							condOp
-						);
+						op = this.armCompiler.constructTST(rd, rn, shiftOp, condOp);
 						break;
 					case 0x01200000:
 						// TEQ
-						op = this.armCompiler.constructTEQ(
-							rd,
-							rn,
-							shiftOp,
-							condOp
-						);
+						op = this.armCompiler.constructTEQ(rd, rn, shiftOp, condOp);
 						break;
 					case 0x01400000:
 						// CMP
-						op = this.armCompiler.constructCMP(
-							rd,
-							rn,
-							shiftOp,
-							condOp
-						);
+						op = this.armCompiler.constructCMP(rd, rn, shiftOp, condOp);
 						break;
 					case 0x01600000:
 						// CMN
-						op = this.armCompiler.constructCMN(
-							rd,
-							rn,
-							shiftOp,
-							condOp
-						);
+						op = this.armCompiler.constructCMN(rd, rn, shiftOp, condOp);
 						break;
 					case 0x01800000:
 						// ORR
 						if (s) {
-							op = this.armCompiler.constructORRS(
-								rd,
-								rn,
-								shiftOp,
-								condOp
-							);
+							op = this.armCompiler.constructORRS(rd, rn, shiftOp, condOp);
 						} else {
-							op = this.armCompiler.constructORR(
-								rd,
-								rn,
-								shiftOp,
-								condOp
-							);
+							op = this.armCompiler.constructORR(rd, rn, shiftOp, condOp);
 						}
 						break;
 					case 0x01a00000:
 						// MOV
 						if (s) {
-							op = this.armCompiler.constructMOVS(
-								rd,
-								rn,
-								shiftOp,
-								condOp
-							);
+							op = this.armCompiler.constructMOVS(rd, rn, shiftOp, condOp);
 						} else {
-							op = this.armCompiler.constructMOV(
-								rd,
-								rn,
-								shiftOp,
-								condOp
-							);
+							op = this.armCompiler.constructMOV(rd, rn, shiftOp, condOp);
 						}
 						break;
 					case 0x01c00000:
 						// BIC
 						if (s) {
-							op = this.armCompiler.constructBICS(
-								rd,
-								rn,
-								shiftOp,
-								condOp
-							);
+							op = this.armCompiler.constructBICS(rd, rn, shiftOp, condOp);
 						} else {
-							op = this.armCompiler.constructBIC(
-								rd,
-								rn,
-								shiftOp,
-								condOp
-							);
+							op = this.armCompiler.constructBIC(rd, rn, shiftOp, condOp);
 						}
 						break;
 					case 0x01e00000:
 						// MVN
 						if (s) {
-							op = this.armCompiler.constructMVNS(
-								rd,
-								rn,
-								shiftOp,
-								condOp
-							);
+							op = this.armCompiler.constructMVNS(rd, rn, shiftOp, condOp);
 						} else {
-							op = this.armCompiler.constructMVN(
-								rd,
-								rn,
-								shiftOp,
-								condOp
-							);
+							op = this.armCompiler.constructMVN(rd, rn, shiftOp, condOp);
 						}
 						break;
 				}
@@ -988,121 +806,51 @@ class ARMCore {
 						switch (instruction & 0x00f00000) {
 							case 0x00000000:
 								// MUL
-								op = this.armCompiler.constructMUL(
-									rd,
-									rs,
-									rm,
-									condOp
-								);
+								op = this.armCompiler.constructMUL(rd, rs, rm, condOp);
 								break;
 							case 0x00100000:
 								// MULS
-								op = this.armCompiler.constructMULS(
-									rd,
-									rs,
-									rm,
-									condOp
-								);
+								op = this.armCompiler.constructMULS(rd, rs, rm, condOp);
 								break;
 							case 0x00200000:
 								// MLA
-								op = this.armCompiler.constructMLA(
-									rd,
-									rn,
-									rs,
-									rm,
-									condOp
-								);
+								op = this.armCompiler.constructMLA(rd, rn, rs, rm, condOp);
 								break;
 							case 0x00300000:
 								// MLAS
-								op = this.armCompiler.constructMLAS(
-									rd,
-									rn,
-									rs,
-									rm,
-									condOp
-								);
+								op = this.armCompiler.constructMLAS(rd, rn, rs, rm, condOp);
 								break;
 							case 0x00800000:
 								// UMULL
-								op = this.armCompiler.constructUMULL(
-									rd,
-									rn,
-									rs,
-									rm,
-									condOp
-								);
+								op = this.armCompiler.constructUMULL(rd, rn, rs, rm, condOp);
 								break;
 							case 0x00900000:
 								// UMULLS
-								op = this.armCompiler.constructUMULLS(
-									rd,
-									rn,
-									rs,
-									rm,
-									condOp
-								);
+								op = this.armCompiler.constructUMULLS(rd, rn, rs, rm, condOp);
 								break;
 							case 0x00a00000:
 								// UMLAL
-								op = this.armCompiler.constructUMLAL(
-									rd,
-									rn,
-									rs,
-									rm,
-									condOp
-								);
+								op = this.armCompiler.constructUMLAL(rd, rn, rs, rm, condOp);
 								break;
 							case 0x00b00000:
 								// UMLALS
-								op = this.armCompiler.constructUMLALS(
-									rd,
-									rn,
-									rs,
-									rm,
-									condOp
-								);
+								op = this.armCompiler.constructUMLALS(rd, rn, rs, rm, condOp);
 								break;
 							case 0x00c00000:
 								// SMULL
-								op = this.armCompiler.constructSMULL(
-									rd,
-									rn,
-									rs,
-									rm,
-									condOp
-								);
+								op = this.armCompiler.constructSMULL(rd, rn, rs, rm, condOp);
 								break;
 							case 0x00d00000:
 								// SMULLS
-								op = this.armCompiler.constructSMULLS(
-									rd,
-									rn,
-									rs,
-									rm,
-									condOp
-								);
+								op = this.armCompiler.constructSMULLS(rd, rn, rs, rm, condOp);
 								break;
 							case 0x00e00000:
 								// SMLAL
-								op = this.armCompiler.constructSMLAL(
-									rd,
-									rn,
-									rs,
-									rm,
-									condOp
-								);
+								op = this.armCompiler.constructSMLAL(rd, rn, rs, rm, condOp);
 								break;
 							case 0x00f00000:
 								// SMLALS
-								op = this.armCompiler.constructSMLALS(
-									rd,
-									rn,
-									rs,
-									rm,
-									condOp
-								);
+								op = this.armCompiler.constructSMLALS(rd, rn, rs, rm, condOp);
 								break;
 						}
 						op.writesPC = rd == this.PC;
@@ -1140,36 +888,20 @@ class ARMCore {
 								if (h) {
 									if (s) {
 										// LDRSH
-										op = this.armCompiler.constructLDRSH(
-											rd,
-											address,
-											condOp
-										);
+										op = this.armCompiler.constructLDRSH(rd, address, condOp);
 									} else {
 										// LDRH
-										op = this.armCompiler.constructLDRH(
-											rd,
-											address,
-											condOp
-										);
+										op = this.armCompiler.constructLDRH(rd, address, condOp);
 									}
 								} else {
 									if (s) {
 										// LDRSB
-										op = this.armCompiler.constructLDRSB(
-											rd,
-											address,
-											condOp
-										);
+										op = this.armCompiler.constructLDRSB(rd, address, condOp);
 									}
 								}
 							} else if (!s && h) {
 								// STRH
-								op = this.armCompiler.constructSTRH(
-									rd,
-									address,
-									condOp
-								);
+								op = this.armCompiler.constructSTRH(rd, address, condOp);
 							}
 						}
 						op.writesPC = rd == this.PC || address.writesPC;
@@ -1184,10 +916,7 @@ class ARMCore {
 					var i = instruction & 0x02000000;
 
 					var address = function () {
-						throw (
-							"Unimplemented memory access: 0x" +
-							instruction.toString(16)
-						);
+						throw 'Unimplemented memory access: 0x' + instruction.toString(16);
 					};
 					if (~instruction & 0x01000000) {
 						// Clear the W bit if the P bit is clear--we don't support memory translation, so these turn into regular accesses
@@ -1200,11 +929,7 @@ class ARMCore {
 						var shiftImmediate = (instruction & 0x00000f80) >> 7;
 
 						if (shiftType || shiftImmediate) {
-							var shiftOp = this.barrelShiftImmediate(
-								shiftType,
-								shiftImmediate,
-								rm
-							);
+							var shiftOp = this.barrelShiftImmediate(shiftType, shiftImmediate, rm);
 							address = this.armCompiler.constructAddressingMode2RegisterShifted(
 								instruction,
 								shiftOp,
@@ -1229,34 +954,18 @@ class ARMCore {
 					if (load) {
 						if (b) {
 							// LDRB
-							op = this.armCompiler.constructLDRB(
-								rd,
-								address,
-								condOp
-							);
+							op = this.armCompiler.constructLDRB(rd, address, condOp);
 						} else {
 							// LDR
-							op = this.armCompiler.constructLDR(
-								rd,
-								address,
-								condOp
-							);
+							op = this.armCompiler.constructLDR(rd, address, condOp);
 						}
 					} else {
 						if (b) {
 							// STRB
-							op = this.armCompiler.constructSTRB(
-								rd,
-								address,
-								condOp
-							);
+							op = this.armCompiler.constructSTRB(rd, address, condOp);
 						} else {
 							// STR
-							op = this.armCompiler.constructSTR(
-								rd,
-								address,
-								condOp
-							);
+							op = this.armCompiler.constructSTR(rd, address, condOp);
 						}
 					}
 					op.writesPC = rd == this.PC || address.writesPC;
@@ -1313,41 +1022,22 @@ class ARMCore {
 							overlap
 						);
 					} else {
-						address = this.armCompiler.constructAddressingMode4(
-							immediate,
-							rn
-						);
+						address = this.armCompiler.constructAddressingMode4(immediate, rn);
 					}
 					if (load) {
 						// LDM
 						if (user) {
-							op = this.armCompiler.constructLDMS(
-								rs,
-								address,
-								condOp
-							);
+							op = this.armCompiler.constructLDMS(rs, address, condOp);
 						} else {
-							op = this.armCompiler.constructLDM(
-								rs,
-								address,
-								condOp
-							);
+							op = this.armCompiler.constructLDM(rs, address, condOp);
 						}
 						op.writesPC = !!(rs & (1 << 15));
 					} else {
 						// STM
 						if (user) {
-							op = this.armCompiler.constructSTMS(
-								rs,
-								address,
-								condOp
-							);
+							op = this.armCompiler.constructSTMS(rs, address, condOp);
 						} else {
-							op = this.armCompiler.constructSTM(
-								rs,
-								address,
-								condOp
-							);
+							op = this.armCompiler.constructSTM(rs, address, condOp);
 						}
 						op.writesPC = false;
 					}
@@ -1381,7 +1071,7 @@ class ARMCore {
 					}
 					break;
 				default:
-					throw "Bad opcode: 0x" + instruction.toString(16);
+					throw 'Bad opcode: 0x' + instruction.toString(16);
 			}
 		}
 
@@ -1511,11 +1201,7 @@ class ARMCore {
 					var immediate = (instruction & 0x01c0) >> 6;
 					if (immediate) {
 						// ADD(1)
-						op = this.thumbCompiler.constructADD1(
-							rd,
-							rn,
-							immediate
-						);
+						op = this.thumbCompiler.constructADD1(rd, rn, immediate);
 					} else {
 						// MOV(2)
 						op = this.thumbCompiler.constructMOV2(rd, rn, rm);
@@ -1671,18 +1357,10 @@ class ARMCore {
 					var immediate = (instruction & 0x07c0) >> 5;
 					if (instruction & 0x0800) {
 						// LDRH(1)
-						op = this.thumbCompiler.constructLDRH1(
-							rd,
-							rn,
-							immediate
-						);
+						op = this.thumbCompiler.constructLDRH1(rd, rn, immediate);
 					} else {
 						// STRH(1)
-						op = this.thumbCompiler.constructSTRH1(
-							rd,
-							rn,
-							immediate
-						);
+						op = this.thumbCompiler.constructSTRH1(rd, rn, immediate);
 					}
 					op.writesPC = false;
 					break;
@@ -1803,12 +1481,10 @@ class ARMCore {
 					}
 					break;
 				default:
-					this.WARN(
-						"Undefined instruction: 0x" + instruction.toString(16)
-					);
+					this.WARN('Undefined instruction: 0x' + instruction.toString(16));
 			}
 		} else {
-			throw "Bad opcode: 0x" + instruction.toString(16);
+			throw 'Bad opcode: 0x' + instruction.toString(16);
 		}
 
 		op.execMode = this.MODE_THUMB;

@@ -21,29 +21,19 @@ class GameBoyAdvanceGPIO {
 				this.readWrite = value & 1;
 				break;
 			default:
-				throw new Error(
-					"BUG: Bad offset passed to GPIO: " + offset.toString(16)
-				);
+				throw new Error('BUG: Bad offset passed to GPIO: ' + offset.toString(16));
 		}
 		if (this.readWrite) {
 			var old = this.rom.view.getUint16(offset, true);
 			old &= ~this.direction;
-			this.rom.view.setUint16(
-				offset,
-				old | (value & this.direction),
-				true
-			);
+			this.rom.view.setUint16(offset, old | (value & this.direction), true);
 		}
 	}
 	outputPins(nybble) {
 		if (this.readWrite) {
 			var old = this.rom.view.getUint16(0xc4, true);
 			old &= this.direction;
-			this.rom.view.setUint16(
-				0xc4,
-				old | (nybble & ~this.direction & 0xf),
-				true
-			);
+			this.rom.view.setUint16(0xc4, old | (nybble & ~this.direction & 0xf), true);
 		}
 	}
 }
@@ -56,13 +46,13 @@ class GameBoyAdvanceRTC {
 		this.direction = 0;
 
 		this.totalBytes = [
-		0, // Force reset
-		0, // Empty
-		7, // Date/Time
-		0, // Force IRQ
-		1, // Control register
-		0, // Empty
-		3, // Time
+			0, // Force reset
+			0, // Empty
+			7, // Date/Time
+			0, // Force IRQ
+			1, // Control register
+			0, // Empty
+			3, // Time
 			0 // Empty
 		];
 		this.bytesRemaining = 0;
@@ -86,12 +76,12 @@ class GameBoyAdvanceRTC {
 
 		this.control = 0x40;
 		this.time = [
-		0, // Year
-		0, // Month
-		0, // Day
-		0, // Day of week
-		0, // Hour
-		0, // Minute
+			0, // Year
+			0, // Month
+			0, // Day
+			0, // Day of week
+			0, // Hour
+			0, // Minute
 			0 // Second
 		];
 	}
@@ -120,9 +110,7 @@ class GameBoyAdvanceRTC {
 								this.processByte();
 							}
 						} else {
-							this.gpio.outputPins(
-								5 | (this.sioOutputPin() << 1)
-							);
+							this.gpio.outputPins(5 | (this.sioOutputPin() << 1));
 							++this.bitsRead;
 							if (this.bitsRead == 8) {
 								--this.bytesRemaining;
@@ -166,9 +154,7 @@ class GameBoyAdvanceRTC {
 							break;
 					}
 				} else {
-					this.gpio.core.WARN(
-						"Invalid RTC command byte: " + this.bits.toString(16)
-					);
+					this.gpio.core.WARN('Invalid RTC command byte: ' + this.bits.toString(16));
 				}
 				break;
 			case 4:

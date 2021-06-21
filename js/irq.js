@@ -160,10 +160,7 @@ class GameBoyAdvanceInterruptHandler {
 
 					timer = this.timers[1];
 					if (timer.countUp) {
-						if (
-							++this.io.registers[this.io.TM1CNT_LO >> 1] ==
-							0x10000
-						) {
+						if (++this.io.registers[this.io.TM1CNT_LO >> 1] == 0x10000) {
 							timer.nextEvent = this.cpu.cycles;
 						}
 					}
@@ -175,12 +172,8 @@ class GameBoyAdvanceInterruptHandler {
 				if (this.cpu.cycles >= timer.nextEvent) {
 					timer.lastEvent = timer.nextEvent;
 					timer.nextEvent += timer.overflowInterval;
-					if (
-						!timer.countUp ||
-						this.io.registers[this.io.TM1CNT_LO >> 1] == 0x10000
-					) {
-						this.io.registers[this.io.TM1CNT_LO >> 1] =
-							timer.reload;
+					if (!timer.countUp || this.io.registers[this.io.TM1CNT_LO >> 1] == 0x10000) {
+						this.io.registers[this.io.TM1CNT_LO >> 1] = timer.reload;
 					}
 					timer.oldReload = timer.reload;
 
@@ -212,10 +205,7 @@ class GameBoyAdvanceInterruptHandler {
 
 					timer = this.timers[2];
 					if (timer.countUp) {
-						if (
-							++this.io.registers[this.io.TM2CNT_LO >> 1] ==
-							0x10000
-						) {
+						if (++this.io.registers[this.io.TM2CNT_LO >> 1] == 0x10000) {
 							timer.nextEvent = this.cpu.cycles;
 						}
 					}
@@ -227,12 +217,8 @@ class GameBoyAdvanceInterruptHandler {
 				if (this.cpu.cycles >= timer.nextEvent) {
 					timer.lastEvent = timer.nextEvent;
 					timer.nextEvent += timer.overflowInterval;
-					if (
-						!timer.countUp ||
-						this.io.registers[this.io.TM2CNT_LO >> 1] == 0x10000
-					) {
-						this.io.registers[this.io.TM2CNT_LO >> 1] =
-							timer.reload;
+					if (!timer.countUp || this.io.registers[this.io.TM2CNT_LO >> 1] == 0x10000) {
+						this.io.registers[this.io.TM2CNT_LO >> 1] = timer.reload;
 					}
 					timer.oldReload = timer.reload;
 
@@ -246,10 +232,7 @@ class GameBoyAdvanceInterruptHandler {
 
 					timer = this.timers[3];
 					if (timer.countUp) {
-						if (
-							++this.io.registers[this.io.TM3CNT_LO >> 1] ==
-							0x10000
-						) {
+						if (++this.io.registers[this.io.TM3CNT_LO >> 1] == 0x10000) {
 							timer.nextEvent = this.cpu.cycles;
 						}
 					}
@@ -261,12 +244,8 @@ class GameBoyAdvanceInterruptHandler {
 				if (this.cpu.cycles >= timer.nextEvent) {
 					timer.lastEvent = timer.nextEvent;
 					timer.nextEvent += timer.overflowInterval;
-					if (
-						!timer.countUp ||
-						this.io.registers[this.io.TM3CNT_LO >> 1] == 0x10000
-					) {
-						this.io.registers[this.io.TM3CNT_LO >> 1] =
-							timer.reload;
+					if (!timer.countUp || this.io.registers[this.io.TM3CNT_LO >> 1] == 0x10000) {
+						this.io.registers[this.io.TM3CNT_LO >> 1] = timer.reload;
 					}
 					timer.oldReload = timer.reload;
 
@@ -282,45 +261,25 @@ class GameBoyAdvanceInterruptHandler {
 		}
 
 		var dma = this.dma[0];
-		if (
-			dma.enable &&
-			dma.doIrq &&
-			dma.nextIRQ &&
-			this.cpu.cycles >= dma.nextIRQ
-		) {
+		if (dma.enable && dma.doIrq && dma.nextIRQ && this.cpu.cycles >= dma.nextIRQ) {
 			dma.nextIRQ = 0;
 			this.raiseIRQ(this.IRQ_DMA0);
 		}
 
 		dma = this.dma[1];
-		if (
-			dma.enable &&
-			dma.doIrq &&
-			dma.nextIRQ &&
-			this.cpu.cycles >= dma.nextIRQ
-		) {
+		if (dma.enable && dma.doIrq && dma.nextIRQ && this.cpu.cycles >= dma.nextIRQ) {
 			dma.nextIRQ = 0;
 			this.raiseIRQ(this.IRQ_DMA1);
 		}
 
 		dma = this.dma[2];
-		if (
-			dma.enable &&
-			dma.doIrq &&
-			dma.nextIRQ &&
-			this.cpu.cycles >= dma.nextIRQ
-		) {
+		if (dma.enable && dma.doIrq && dma.nextIRQ && this.cpu.cycles >= dma.nextIRQ) {
 			dma.nextIRQ = 0;
 			this.raiseIRQ(this.IRQ_DMA2);
 		}
 
 		dma = this.dma[3];
-		if (
-			dma.enable &&
-			dma.doIrq &&
-			dma.nextIRQ &&
-			this.cpu.cycles >= dma.nextIRQ
-		) {
+		if (dma.enable && dma.doIrq && dma.nextIRQ && this.cpu.cycles >= dma.nextIRQ) {
 			dma.nextIRQ = 0;
 			this.raiseIRQ(this.IRQ_DMA3);
 		}
@@ -347,9 +306,7 @@ class GameBoyAdvanceInterruptHandler {
 		switch (opcode) {
 			case 0x00:
 				// SoftReset
-				var mem = this.core.mmu.memory[
-					this.core.mmu.REGION_WORKING_IRAM
-				];
+				var mem = this.core.mmu.memory[this.core.mmu.REGION_WORKING_IRAM];
 				var flag = mem.loadU8(0x7ffa);
 				for (var i = 0x7e00; i < 0x8000; i += 4) {
 					mem.store32(i, 0);
@@ -368,26 +325,21 @@ class GameBoyAdvanceInterruptHandler {
 				// RegisterRamReset
 				var regions = this.cpu.gprs[0];
 				if (regions & 0x01) {
-					this.core.mmu.memory[
-						this.core.mmu.REGION_WORKING_RAM
-					] = new MemoryBlock(this.core.mmu.SIZE_WORKING_RAM, 9);
+					this.core.mmu.memory[this.core.mmu.REGION_WORKING_RAM] = new MemoryBlock(
+						this.core.mmu.SIZE_WORKING_RAM,
+						9
+					);
 				}
 				if (regions & 0x02) {
-					for (
-						var i = 0;
-						i < this.core.mmu.SIZE_WORKING_IRAM - 0x200;
-						i += 4
-					) {
-						this.core.mmu.memory[
-							this.core.mmu.REGION_WORKING_IRAM
-						].store32(i, 0);
+					for (var i = 0; i < this.core.mmu.SIZE_WORKING_IRAM - 0x200; i += 4) {
+						this.core.mmu.memory[this.core.mmu.REGION_WORKING_IRAM].store32(i, 0);
 					}
 				}
 				if (regions & 0x1c) {
 					this.video.renderPath.clearSubsets(this.core.mmu, regions);
 				}
 				if (regions & 0xe0) {
-					this.core.STUB("Unimplemented RegisterRamReset");
+					this.core.STUB('Unimplemented RegisterRamReset');
 				}
 				break;
 			case 0x02:
@@ -404,10 +356,7 @@ class GameBoyAdvanceInterruptHandler {
 				if (!this.enable) {
 					this.io.store16(this.io.IME, 1);
 				}
-				if (
-					!this.cpu.gprs[0] &&
-					this.interruptFlags & this.cpu.gprs[1]
-				) {
+				if (!this.cpu.gprs[0] && this.interruptFlags & this.cpu.gprs[1]) {
 					return;
 				}
 				this.dismissIRQs(0xffffffff);
@@ -523,9 +472,7 @@ class GameBoyAdvanceInterruptHandler {
 					cy = this.core.mmu.load16(offset + 10);
 					sx = this.core.mmu.load16(offset + 12) / 256;
 					sy = this.core.mmu.load16(offset + 14) / 256;
-					theta =
-						((this.core.mmu.loadU16(offset + 16) >> 8) / 128) *
-						Math.PI;
+					theta = ((this.core.mmu.loadU16(offset + 16) >> 8) / 128) * Math.PI;
 					offset += 20;
 					// Rotation
 					a = d = Math.cos(theta);
@@ -561,9 +508,7 @@ class GameBoyAdvanceInterruptHandler {
 					// [  0  sy ] * [ sin(theta)   cos(theta) ] = [ C D ]
 					sx = this.core.mmu.load16(offset) / 256;
 					sy = this.core.mmu.load16(offset + 2) / 256;
-					theta =
-						((this.core.mmu.loadU16(offset + 4) >> 8) / 128) *
-						Math.PI;
+					theta = ((this.core.mmu.loadU16(offset + 4) >> 8) / 128) * Math.PI;
 					offset += 6;
 					// Rotation
 					a = d = Math.cos(theta);
@@ -575,14 +520,8 @@ class GameBoyAdvanceInterruptHandler {
 					d *= sy;
 					this.core.mmu.store16(destination, (a * 256) | 0);
 					this.core.mmu.store16(destination + diff, (b * 256) | 0);
-					this.core.mmu.store16(
-						destination + diff * 2,
-						(c * 256) | 0
-					);
-					this.core.mmu.store16(
-						destination + diff * 3,
-						(d * 256) | 0
-					);
+					this.core.mmu.store16(destination + diff * 2, (c * 256) | 0);
+					this.core.mmu.store16(destination + diff * 3, (d * 256) | 0);
 					destination += diff * 4;
 				}
 				break;
@@ -609,12 +548,12 @@ class GameBoyAdvanceInterruptHandler {
 			case 0x1f:
 				// MidiKey2Freq
 				var key = this.cpu.mmu.load32(this.cpu.gprs[0] + 4);
-				this.cpu.gprs[0] = key / Math.pow(2, (180 - this.cpu.gprs[1] - this.cpu.gprs[2] / 256) / 12) >>> 0;
+				this.cpu.gprs[0] =
+					(key / Math.pow(2, (180 - this.cpu.gprs[1] - this.cpu.gprs[2] / 256) / 12)) >>>
+					0;
 				break;
 			default:
-				throw (
-					"Unimplemented software interrupt: 0x" + opcode.toString(16)
-				);
+				throw 'Unimplemented software interrupt: 0x' + opcode.toString(16);
 		}
 	}
 	masterEnable(value) {
@@ -628,11 +567,11 @@ class GameBoyAdvanceInterruptHandler {
 		this.enabledIRQs = value;
 
 		if (this.enabledIRQs & this.MASK_SIO) {
-			this.core.STUB("Serial I/O interrupts not implemented");
+			this.core.STUB('Serial I/O interrupts not implemented');
 		}
 
 		if (this.enabledIRQs & this.MASK_KEYPAD) {
-			this.core.STUB("Keypad interrupts not implemented");
+			this.core.STUB('Keypad interrupts not implemented');
 		}
 
 		if (this.enable && this.enabledIRQs & this.interruptFlags) {
@@ -676,52 +615,29 @@ class GameBoyAdvanceInterruptHandler {
 
 		var dma = this.dma[0];
 		test = dma.nextIRQ;
-		if (
-			dma.enable &&
-			dma.doIrq &&
-			test &&
-			(!nextEvent || test < nextEvent)
-		) {
+		if (dma.enable && dma.doIrq && test && (!nextEvent || test < nextEvent)) {
 			nextEvent = test;
 		}
 
 		dma = this.dma[1];
 		test = dma.nextIRQ;
-		if (
-			dma.enable &&
-			dma.doIrq &&
-			test &&
-			(!nextEvent || test < nextEvent)
-		) {
+		if (dma.enable && dma.doIrq && test && (!nextEvent || test < nextEvent)) {
 			nextEvent = test;
 		}
 
 		dma = this.dma[2];
 		test = dma.nextIRQ;
-		if (
-			dma.enable &&
-			dma.doIrq &&
-			test &&
-			(!nextEvent || test < nextEvent)
-		) {
+		if (dma.enable && dma.doIrq && test && (!nextEvent || test < nextEvent)) {
 			nextEvent = test;
 		}
 
 		dma = this.dma[3];
 		test = dma.nextIRQ;
-		if (
-			dma.enable &&
-			dma.doIrq &&
-			test &&
-			(!nextEvent || test < nextEvent)
-		) {
+		if (dma.enable && dma.doIrq && test && (!nextEvent || test < nextEvent)) {
 			nextEvent = test;
 		}
 
-		this.core.ASSERT(
-			nextEvent >= this.cpu.cycles,
-			"Next event is before present"
-		);
+		this.core.ASSERT(nextEvent >= this.cpu.cycles, 'Next event is before present');
 		this.nextEvent = nextEvent;
 	}
 	waitForIRQ() {
@@ -802,7 +718,7 @@ class GameBoyAdvanceInterruptHandler {
 		currentDma.nextIRQ = 0;
 
 		if (currentDma.drq) {
-			this.core.WARN("DRQ not implemented");
+			this.core.WARN('DRQ not implemented');
 		}
 
 		if (!wasEnabled && currentDma.enable) {
@@ -841,30 +757,23 @@ class GameBoyAdvanceInterruptHandler {
 		if (!wasEnabled && currentTimer.enable) {
 			if (!currentTimer.countUp) {
 				currentTimer.lastEvent = this.cpu.cycles;
-				currentTimer.nextEvent =
-					this.cpu.cycles + currentTimer.overflowInterval;
+				currentTimer.nextEvent = this.cpu.cycles + currentTimer.overflowInterval;
 			} else {
 				currentTimer.nextEvent = 0;
 			}
-			this.io.registers[(this.io.TM0CNT_LO + (timer << 2)) >> 1] =
-				currentTimer.reload;
+			this.io.registers[(this.io.TM0CNT_LO + (timer << 2)) >> 1] = currentTimer.reload;
 			currentTimer.oldReload = currentTimer.reload;
 			++this.timersEnabled;
 		} else if (wasEnabled && !currentTimer.enable) {
 			if (!currentTimer.countUp) {
 				this.io.registers[(this.io.TM0CNT_LO + (timer << 2)) >> 1] =
-					(currentTimer.oldReload +
-						(this.cpu.cycles - currentTimer.lastEvent)) >>
+					(currentTimer.oldReload + (this.cpu.cycles - currentTimer.lastEvent)) >>
 					oldPrescale;
 			}
 			--this.timersEnabled;
-		} else if (
-			currentTimer.prescaleBits != oldPrescale &&
-			!currentTimer.countUp
-		) {
+		} else if (currentTimer.prescaleBits != oldPrescale && !currentTimer.countUp) {
 			// FIXME: this might be before present
-			currentTimer.nextEvent =
-				currentTimer.lastEvent + currentTimer.overflowInterval;
+			currentTimer.nextEvent = currentTimer.lastEvent + currentTimer.overflowInterval;
 		}
 
 		// We've changed the timers somehow...we need to reset the next event
@@ -874,8 +783,7 @@ class GameBoyAdvanceInterruptHandler {
 		var currentTimer = this.timers[timer];
 		if (currentTimer.enable && !currentTimer.countUp) {
 			return (
-				(currentTimer.oldReload +
-					(this.cpu.cycles - currentTimer.lastEvent)) >>
+				(currentTimer.oldReload + (this.cpu.cycles - currentTimer.lastEvent)) >>
 				currentTimer.prescaleBits
 			);
 		} else {
@@ -884,10 +792,10 @@ class GameBoyAdvanceInterruptHandler {
 	}
 	halt() {
 		if (!this.enable) {
-			throw "Requested HALT when interrupts were disabled!";
+			throw 'Requested HALT when interrupts were disabled!';
 		}
 		if (!this.waitForIRQ()) {
-			throw "Waiting on interrupt forever.";
+			throw 'Waiting on interrupt forever.';
 		}
 	}
 	lz77(source, dest, unitsize) {
@@ -908,13 +816,9 @@ class GameBoyAdvanceInterruptHandler {
 				if (blockheader & 0x80) {
 					// Compressed
 					block =
-						this.cpu.mmu.loadU8(sPointer) |
-						(this.cpu.mmu.loadU8(sPointer + 1) << 8);
+						this.cpu.mmu.loadU8(sPointer) | (this.cpu.mmu.loadU8(sPointer + 1) << 8);
 					sPointer += 2;
-					disp =
-						dPointer -
-						(((block & 0x000f) << 8) | ((block & 0xff00) >> 8)) -
-						1;
+					disp = dPointer - (((block & 0x000f) << 8) | ((block & 0xff00) >> 8)) - 1;
 					bytes = ((block & 0x00f0) >> 4) + 3;
 					while (bytes-- && remaining) {
 						loaded = this.cpu.mmu.loadU8(disp++);
@@ -959,7 +863,7 @@ class GameBoyAdvanceInterruptHandler {
 		var remaining = header >> 8;
 		var bits = header & 0xf;
 		if (32 % bits) {
-			throw "Unimplemented unaligned Huffman";
+			throw 'Unimplemented unaligned Huffman';
 		}
 		var padding = (4 - remaining) & 0x3;
 		remaining &= 0xfffffffc;
@@ -982,12 +886,8 @@ class GameBoyAdvanceInterruptHandler {
 		while (remaining > 0) {
 			var bitstream = this.cpu.mmu.load32(sPointer);
 			sPointer += 4;
-			for (
-				bitsRemaining = 32;
-				bitsRemaining > 0;
-				--bitsRemaining, bitstream <<= 1
-			) {
-				if (typeof node === "number") {
+			for (bitsRemaining = 32; bitsRemaining > 0; --bitsRemaining, bitstream <<= 1) {
+				if (typeof node === 'number') {
 					// Lazily construct tree
 					var next = ((offset - 1) | 1) + ((node & 0x3f) << 1) + 2;
 					node = {
