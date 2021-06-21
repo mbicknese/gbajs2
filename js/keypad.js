@@ -1,13 +1,20 @@
-const connectEvents = ["gamepadconnected", "mozgamepadconnected", "webkitgamepadconnected"];
-const disconnectEvents = ["gamepaddisconnected", "mozgamepaddisconnected", "webkitgamepaddisconnected"];
+const connectEvents = ['gamepadconnected', 'mozgamepadconnected', 'webkitgamepadconnected'];
+const disconnectEvents = [
+	'gamepaddisconnected',
+	'mozgamepaddisconnected',
+	'webkitgamepaddisconnected'
+];
 
 class GameBoyAdvanceKeypad {
 	static KEY_OFFSET = 0x03ff;
 	get currentDown() {
-		return Object.values(this.pressedKeys).reduce((acc, value) => acc & ~value, GameBoyAdvanceKeypad.KEY_OFFSET);
+		return Object.values(this.pressedKeys).reduce(
+			(acc, value) => acc & ~value,
+			GameBoyAdvanceKeypad.KEY_OFFSET
+		);
 	}
 
-	pressedKeys = { keyboard: 0 }
+	pressedKeys = { keyboard: 0 };
 
 	constructor() {
 		this.KEYCODE_LEFT = 37;
@@ -36,15 +43,15 @@ class GameBoyAdvanceKeypad {
 
 		this.gamepads = [];
 
-		this.remappingKeyId = "";
+		this.remappingKeyId = '';
 	}
 	keyboardHandler(e) {
 		var toggle = 0;
 
 		// Check for a remapping
-		if (this.remappingKeyId != "") {
+		if (this.remappingKeyId != '') {
 			this.remapKeycode(this.remappingKeyId, e.keyCode);
-			this.remappingKeyId = "";
+			this.remappingKeyId = '';
 			e.preventDefault();
 			return;
 		}
@@ -85,10 +92,10 @@ class GameBoyAdvanceKeypad {
 		}
 
 		toggle = 1 << toggle;
-		if (e.type === "keydown") {
-			this.pressedKeys["keyboard"] |= toggle;
+		if (e.type === 'keydown') {
+			this.pressedKeys['keyboard'] |= toggle;
 		} else {
-			this.pressedKeys["keyboard"] &= ~toggle;
+			this.pressedKeys['keyboard'] &= ~toggle;
 		}
 
 		if (this.eatInput) {
@@ -151,27 +158,28 @@ class GameBoyAdvanceKeypad {
 				this.gamepads.push(navigatorList[i]);
 			}
 		}
-		this.gamepads.forEach(
-			gamepad => { this.gamepadHandler(gamepad, gamepadMaps[gamepad.id] || gamepadMaps["default"]); }
-		);
+		this.gamepads.forEach((gamepad) => {
+			this.gamepadHandler(gamepad, gamepadMaps[gamepad.id] || gamepadMaps['default']);
+		});
 	}
 	registerHandlers() {
-		window.addEventListener("keydown", this.keyboardHandler.bind(this), true);
-		window.addEventListener("keyup", this.keyboardHandler.bind(this), true);
+		window.addEventListener('keydown', this.keyboardHandler.bind(this), true);
+		window.addEventListener('keyup', this.keyboardHandler.bind(this), true);
 
 		const boundGamepadConnectHandler = this.gamepadConnectHandler.bind(this);
-		connectEvents
-			.forEach(event => { window.addEventListener(event, boundGamepadConnectHandler, true); });
+		connectEvents.forEach((event) => {
+			window.addEventListener(event, boundGamepadConnectHandler, true);
+		});
 
 		const boundGamepadDisconnectHandler = this.gamepadConnectHandler.bind(this);
-		disconnectEvents
-			.forEach(event => { window.addEventListener(event, boundGamepadDisconnectHandler, true); });
-
+		disconnectEvents.forEach((event) => {
+			window.addEventListener(event, boundGamepadDisconnectHandler, true);
+		});
 	}
 	// keyId is ["A", "B", "SELECT", "START", "RIGHT", "LEFT", "UP", "DOWN", "R", "L"]
 	initKeycodeRemap(keyId) {
 		// Ensure valid keyId
-		var validKeyIds = ["A", "B", "SELECT", "START", "RIGHT", "LEFT", "UP", "DOWN", "R", "L"];
+		var validKeyIds = ['A', 'B', 'SELECT', 'START', 'RIGHT', 'LEFT', 'UP', 'DOWN', 'R', 'L'];
 		if (validKeyIds.indexOf(keyId) != -1) {
 			/* If remappingKeyId holds a value, the keydown event above will
 			wait for the next keypress to assign the keycode */
@@ -181,34 +189,34 @@ class GameBoyAdvanceKeypad {
 	// keyId is ["A", "B", "SELECT", "START", "RIGHT", "LEFT", "UP", "DOWN", "R", "L"]
 	remapKeycode(keyId, keycode) {
 		switch (keyId) {
-			case "A":
+			case 'A':
 				this.KEYCODE_A = keycode;
 				break;
-			case "B":
+			case 'B':
 				this.KEYCODE_B = keycode;
 				break;
-			case "SELECT":
+			case 'SELECT':
 				this.KEYCODE_SELECT = keycode;
 				break;
-			case "START":
+			case 'START':
 				this.KEYCODE_START = keycode;
 				break;
-			case "RIGHT":
+			case 'RIGHT':
 				this.KEYCODE_RIGHT = keycode;
 				break;
-			case "LEFT":
+			case 'LEFT':
 				this.KEYCODE_LEFT = keycode;
 				break;
-			case "UP":
+			case 'UP':
 				this.KEYCODE_UP = keycode;
 				break;
-			case "DOWN":
+			case 'DOWN':
 				this.KEYCODE_DOWN = keycode;
 				break;
-			case "R":
+			case 'R':
 				this.KEYCODE_R = keycode;
 				break;
-			case "L":
+			case 'L':
 				this.KEYCODE_L = keycode;
 				break;
 		}
@@ -216,7 +224,7 @@ class GameBoyAdvanceKeypad {
 }
 
 const gamepadMaps = {
-	"default": {		
+	default: {
 		GAMEPAD_LEFT: 14,
 		GAMEPAD_UP: 12,
 		GAMEPAD_RIGHT: 15,
@@ -229,7 +237,7 @@ const gamepadMaps = {
 		GAMEPAD_R: 5,
 		GAMEPAD_THRESHOLD: 0.2
 	},
-	"Xbox Wireless Controller Extended Gamepad": {		
+	'Xbox Wireless Controller Extended Gamepad': {
 		GAMEPAD_LEFT: 14,
 		GAMEPAD_UP: 12,
 		GAMEPAD_RIGHT: 15,
@@ -242,8 +250,8 @@ const gamepadMaps = {
 		GAMEPAD_R: 5,
 		GAMEPAD_THRESHOLD: 0.2
 	},
-	"Wireless Controller Extended Gamepad": {
-	// Also known as DualShock 4
+	'Wireless Controller Extended Gamepad': {
+		// Also known as DualShock 4
 		GAMEPAD_LEFT: 14,
 		GAMEPAD_UP: 12,
 		GAMEPAD_RIGHT: 15,

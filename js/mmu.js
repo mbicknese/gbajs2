@@ -2,10 +2,7 @@ class MemoryView {
 	constructor(memory, offset) {
 		// this.inherit();
 		this.buffer = memory;
-		this.view = new DataView(
-			this.buffer,
-			typeof offset === "number" ? offset : 0
-		);
+		this.view = new DataView(this.buffer, typeof offset === 'number' ? offset : 0);
 		this.mask = memory.byteLength - 1;
 		this.resetMask();
 	}
@@ -46,10 +43,7 @@ class MemoryView {
 	invalidatePage(address) {}
 	replaceData(memory, offset) {
 		this.buffer = memory;
-		this.view = new DataView(
-			this.buffer,
-			typeof offset === "number" ? offset : 0
-		);
+		this.view = new DataView(this.buffer, typeof offset === 'number' ? offset : 0);
 		if (this.icache) {
 			this.icache = new Array(this.icache.length);
 		}
@@ -149,41 +143,29 @@ class BadMemory {
 	}
 	load8(offset) {
 		return this.mmu.load8(
-			this.cpu.gprs[this.cpu.PC] -
-				this.cpu.instructionWidth +
-				(offset & 0x3)
+			this.cpu.gprs[this.cpu.PC] - this.cpu.instructionWidth + (offset & 0x3)
 		);
 	}
 	load16(offset) {
 		return this.mmu.load16(
-			this.cpu.gprs[this.cpu.PC] -
-				this.cpu.instructionWidth +
-				(offset & 0x2)
+			this.cpu.gprs[this.cpu.PC] - this.cpu.instructionWidth + (offset & 0x2)
 		);
 	}
 	loadU8(offset) {
 		return this.mmu.loadU8(
-			this.cpu.gprs[this.cpu.PC] -
-				this.cpu.instructionWidth +
-				(offset & 0x3)
+			this.cpu.gprs[this.cpu.PC] - this.cpu.instructionWidth + (offset & 0x3)
 		);
 	}
 	loadU16(offset) {
 		return this.mmu.loadU16(
-			this.cpu.gprs[this.cpu.PC] -
-				this.cpu.instructionWidth +
-				(offset & 0x2)
+			this.cpu.gprs[this.cpu.PC] - this.cpu.instructionWidth + (offset & 0x2)
 		);
 	}
 	load32(offset) {
 		if (this.cpu.execMode == this.cpu.MODE_ARM) {
-			return this.mmu.load32(
-				this.cpu.gprs[this.cpu.gprs.PC] - this.cpu.instructionWidth
-			);
+			return this.mmu.load32(this.cpu.gprs[this.cpu.gprs.PC] - this.cpu.instructionWidth);
 		} else {
-			var halfword = this.mmu.loadU16(
-				this.cpu.gprs[this.cpu.PC] - this.cpu.instructionWidth
-			);
+			var halfword = this.mmu.loadU16(this.cpu.gprs[this.cpu.PC] - this.cpu.instructionWidth);
 			return halfword | (halfword << 16);
 		}
 	}
@@ -254,23 +236,7 @@ class GameBoyAdvanceMMU {
 		this.WAITSTATES = [0, 0, 2, 0, 0, 0, 0, 0, 4, 4, 4, 4, 4, 4, 4];
 		this.WAITSTATES_32 = [0, 0, 5, 0, 0, 1, 0, 1, 7, 7, 9, 9, 13, 13, 8];
 		this.WAITSTATES_SEQ = [0, 0, 2, 0, 0, 0, 0, 0, 2, 2, 4, 4, 8, 8, 4];
-		this.WAITSTATES_SEQ_32 = [
-			0,
-			0,
-			5,
-			0,
-			0,
-			1,
-			0,
-			1,
-			5,
-			5,
-			9,
-			9,
-			17,
-			17,
-			8
-		];
+		this.WAITSTATES_SEQ_32 = [0, 0, 5, 0, 0, 1, 0, 1, 5, 5, 9, 9, 17, 17, 8];
 		this.NULLWAIT = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
 		for (var i = 15; i < 256; ++i) {
@@ -303,10 +269,10 @@ class GameBoyAdvanceMMU {
 			this.badMemory,
 			new MemoryBlock(this.SIZE_WORKING_RAM, 9),
 			new MemoryBlock(this.SIZE_WORKING_IRAM, 7),
-		null, // This is owned by GameBoyAdvanceIO
-		null, // This is owned by GameBoyAdvancePalette
-		null, // This is owned by GameBoyAdvanceVRAM
-		null, // This is owned by GameBoyAdvanceOAM
+			null, // This is owned by GameBoyAdvanceIO
+			null, // This is owned by GameBoyAdvancePalette
+			null, // This is owned by GameBoyAdvanceVRAM
+			null, // This is owned by GameBoyAdvanceOAM
 			this.badMemory,
 			this.badMemory,
 			this.badMemory,
@@ -340,9 +306,7 @@ class GameBoyAdvanceMMU {
 	freeze() {
 		return {
 			ram: Serializer.prefix(this.memory[this.REGION_WORKING_RAM].buffer),
-			iram: Serializer.prefix(
-				this.memory[this.REGION_WORKING_IRAM].buffer
-			)
+			iram: Serializer.prefix(this.memory[this.REGION_WORKING_IRAM].buffer)
 		};
 	}
 	defrost(frost) {
@@ -380,7 +344,7 @@ class GameBoyAdvanceMMU {
 		}
 
 		if (process) {
-			var name = "";
+			var name = '';
 			for (var i = 0; i < 12; ++i) {
 				var c = lo.loadU8(i + 0xa0);
 				if (!c) {
@@ -390,7 +354,7 @@ class GameBoyAdvanceMMU {
 			}
 			cart.title = name;
 
-			var code = "";
+			var code = '';
 			for (var i = 0; i < 4; ++i) {
 				var c = lo.loadU8(i + 0xac);
 				if (!c) {
@@ -400,7 +364,7 @@ class GameBoyAdvanceMMU {
 			}
 			cart.code = code;
 
-			var maker = "";
+			var maker = '';
 			for (var i = 0; i < 2; ++i) {
 				var c = lo.loadU8(i + 0xb0);
 				if (!c) {
@@ -411,44 +375,44 @@ class GameBoyAdvanceMMU {
 			cart.maker = maker;
 
 			// Find savedata type
-			var state = "";
+			var state = '';
 			var next;
 			var terminal = false;
 			for (var i = 0xe4; i < rom.byteLength && !terminal; ++i) {
 				next = String.fromCharCode(lo.loadU8(i));
 				state += next;
 				switch (state) {
-					case "F":
-					case "FL":
-					case "FLA":
-					case "FLAS":
-					case "FLASH":
-					case "FLASH_":
-					case "FLASH5":
-					case "FLASH51":
-					case "FLASH512":
-					case "FLASH512_":
-					case "FLASH1":
-					case "FLASH1M":
-					case "FLASH1M_":
-					case "S":
-					case "SR":
-					case "SRA":
-					case "SRAM":
-					case "SRAM_":
-					case "E":
-					case "EE":
-					case "EEP":
-					case "EEPR":
-					case "EEPRO":
-					case "EEPROM":
-					case "EEPROM_":
+					case 'F':
+					case 'FL':
+					case 'FLA':
+					case 'FLAS':
+					case 'FLASH':
+					case 'FLASH_':
+					case 'FLASH5':
+					case 'FLASH51':
+					case 'FLASH512':
+					case 'FLASH512_':
+					case 'FLASH1':
+					case 'FLASH1M':
+					case 'FLASH1M_':
+					case 'S':
+					case 'SR':
+					case 'SRA':
+					case 'SRAM':
+					case 'SRAM_':
+					case 'E':
+					case 'EE':
+					case 'EEP':
+					case 'EEPR':
+					case 'EEPRO':
+					case 'EEPROM':
+					case 'EEPROM_':
 						break;
-					case "FLASH_V":
-					case "FLASH512_V":
-					case "FLASH1M_V":
-					case "SRAM_V":
-					case "EEPROM_V":
+					case 'FLASH_V':
+					case 'FLASH512_V':
+					case 'FLASH1M_V':
+					case 'SRAM_V':
+					case 'EEPROM_V':
 						terminal = true;
 						break;
 					default:
@@ -459,34 +423,35 @@ class GameBoyAdvanceMMU {
 			if (terminal) {
 				cart.saveType = state;
 				switch (state) {
-					case "FLASH_V":
-					case "FLASH512_V":
-						this.save = this.memory[
-							this.REGION_CART_SRAM
-						] = new FlashSavedata(this.SIZE_CART_FLASH512);
+					case 'FLASH_V':
+					case 'FLASH512_V':
+						this.save = this.memory[this.REGION_CART_SRAM] = new FlashSavedata(
+							this.SIZE_CART_FLASH512
+						);
 						break;
-					case "FLASH1M_V":
-						this.save = this.memory[
-							this.REGION_CART_SRAM
-						] = new FlashSavedata(this.SIZE_CART_FLASH1M);
+					case 'FLASH1M_V':
+						this.save = this.memory[this.REGION_CART_SRAM] = new FlashSavedata(
+							this.SIZE_CART_FLASH1M
+						);
 						break;
-					case "SRAM_V":
-						this.save = this.memory[
-							this.REGION_CART_SRAM
-						] = new SRAMSavedata(this.SIZE_CART_SRAM);
+					case 'SRAM_V':
+						this.save = this.memory[this.REGION_CART_SRAM] = new SRAMSavedata(
+							this.SIZE_CART_SRAM
+						);
 						break;
-					case "EEPROM_V":
-						this.save = this.memory[
-							this.REGION_CART2 + 1
-						] = new EEPROMSavedata(this.SIZE_CART_EEPROM, this);
+					case 'EEPROM_V':
+						this.save = this.memory[this.REGION_CART2 + 1] = new EEPROMSavedata(
+							this.SIZE_CART_EEPROM,
+							this
+						);
 						break;
 				}
 			}
 			if (!this.save) {
 				// Assume we have SRAM
-				this.save = this.memory[
-					this.REGION_CART_SRAM
-				] = new SRAMSavedata(this.SIZE_CART_SRAM);
+				this.save = this.memory[this.REGION_CART_SRAM] = new SRAMSavedata(
+					this.SIZE_CART_SRAM
+				);
 			}
 		}
 
@@ -497,29 +462,19 @@ class GameBoyAdvanceMMU {
 		this.save.replaceData(save);
 	}
 	load8(offset) {
-		return this.memory[offset >>> this.BASE_OFFSET].load8(
-			offset & 0x00ffffff
-		);
+		return this.memory[offset >>> this.BASE_OFFSET].load8(offset & 0x00ffffff);
 	}
 	load16(offset) {
-		return this.memory[offset >>> this.BASE_OFFSET].load16(
-			offset & 0x00ffffff
-		);
+		return this.memory[offset >>> this.BASE_OFFSET].load16(offset & 0x00ffffff);
 	}
 	load32(offset) {
-		return this.memory[offset >>> this.BASE_OFFSET].load32(
-			offset & 0x00ffffff
-		);
+		return this.memory[offset >>> this.BASE_OFFSET].load32(offset & 0x00ffffff);
 	}
 	loadU8(offset) {
-		return this.memory[offset >>> this.BASE_OFFSET].loadU8(
-			offset & 0x00ffffff
-		);
+		return this.memory[offset >>> this.BASE_OFFSET].loadU8(offset & 0x00ffffff);
 	}
 	loadU16(offset) {
-		return this.memory[offset >>> this.BASE_OFFSET].loadU16(
-			offset & 0x00ffffff
-		);
+		return this.memory[offset >>> this.BASE_OFFSET].loadU16(offset & 0x00ffffff);
 	}
 	store8(offset, value) {
 		var maskedOffset = offset & 0x00ffffff;
@@ -541,12 +496,10 @@ class GameBoyAdvanceMMU {
 		memory.invalidatePage(maskedOffset + 2);
 	}
 	waitPrefetch(memory) {
-		this.cpu.cycles +=
-			1 + this.waitstatesPrefetch[memory >>> this.BASE_OFFSET];
+		this.cpu.cycles += 1 + this.waitstatesPrefetch[memory >>> this.BASE_OFFSET];
 	}
 	waitPrefetch32(memory) {
-		this.cpu.cycles +=
-			1 + this.waitstatesPrefetch32[memory >>> this.BASE_OFFSET];
+		this.cpu.cycles += 1 + this.waitstatesPrefetch32[memory >>> this.BASE_OFFSET];
 	}
 	wait(memory) {
 		this.cpu.cycles += 1 + this.waitstates[memory >>> this.BASE_OFFSET];
@@ -558,8 +511,7 @@ class GameBoyAdvanceMMU {
 		this.cpu.cycles += 1 + this.waitstatesSeq[memory >>> this.BASE_OFFSET];
 	}
 	waitSeq32(memory) {
-		this.cpu.cycles +=
-			1 + this.waitstatesSeq32[memory >>> this.BASE_OFFSET];
+		this.cpu.cycles += 1 + this.waitstatesSeq32[memory >>> this.BASE_OFFSET];
 	}
 	waitMul(rs) {
 		if (rs & (0xffffff00 == 0xffffff00) || !(rs & 0xffffff00)) {
@@ -574,8 +526,7 @@ class GameBoyAdvanceMMU {
 	}
 	waitMulti32(memory, seq) {
 		this.cpu.cycles += 1 + this.waitstates32[memory >>> this.BASE_OFFSET];
-		this.cpu.cycles +=
-			(1 + this.waitstatesSeq32[memory >>> this.BASE_OFFSET]) * (seq - 1);
+		this.cpu.cycles += (1 + this.waitstatesSeq32[memory >>> this.BASE_OFFSET]) * (seq - 1);
 	}
 	addressToPage(region, address) {
 		return address >> this.memory[region].ICACHE_PAGE_BITS;
@@ -607,7 +558,7 @@ class GameBoyAdvanceMMU {
 			case this.DMA_TIMING_CUSTOM:
 				switch (number) {
 					case 0:
-						this.core.WARN("Discarding invalid DMA0 scheduling");
+						this.core.WARN('Discarding invalid DMA0 scheduling');
 						break;
 					case 1:
 					case 2:
@@ -660,21 +611,13 @@ class GameBoyAdvanceMMU {
 		var word;
 
 		if (destBlock.ICACHE_PAGE_BITS) {
-			var endPage =
-				(dest + wordsRemaining * width) >> destBlock.ICACHE_PAGE_BITS;
-			for (
-				var i = dest >> destBlock.ICACHE_PAGE_BITS;
-				i <= endPage;
-				++i
-			) {
+			var endPage = (dest + wordsRemaining * width) >> destBlock.ICACHE_PAGE_BITS;
+			for (var i = dest >> destBlock.ICACHE_PAGE_BITS; i <= endPage; ++i) {
 				destBlock.invalidatePage(i << destBlock.ICACHE_PAGE_BITS);
 			}
 		}
 
-		if (
-			destRegion == this.REGION_WORKING_RAM ||
-			destRegion == this.REGION_WORKING_IRAM
-		) {
+		if (destRegion == this.REGION_WORKING_RAM || destRegion == this.REGION_WORKING_IRAM) {
 			destView = destBlock.view;
 			destMask = destBlock.mask;
 		}
@@ -746,24 +689,20 @@ class GameBoyAdvanceMMU {
 				}
 			}
 		} else {
-			this.core.WARN("Invalid DMA");
+			this.core.WARN('Invalid DMA');
 		}
 
 		if (info.doIrq) {
 			info.nextIRQ = this.cpu.cycles + 2;
 			info.nextIRQ +=
 				width == 4
-					? this.waitstates32[sourceRegion] +
-					  this.waitstates32[destRegion]
-					: this.waitstates[sourceRegion] +
-					  this.waitstates[destRegion];
+					? this.waitstates32[sourceRegion] + this.waitstates32[destRegion]
+					: this.waitstates[sourceRegion] + this.waitstates[destRegion];
 			info.nextIRQ +=
 				(info.count - 1) *
 				(width == 4
-					? this.waitstatesSeq32[sourceRegion] +
-					  this.waitstatesSeq32[destRegion]
-					: this.waitstatesSeq[sourceRegion] +
-					  this.waitstatesSeq[destRegion]);
+					? this.waitstatesSeq32[sourceRegion] + this.waitstatesSeq32[destRegion]
+					: this.waitstatesSeq[sourceRegion] + this.waitstatesSeq[destRegion]);
 		}
 
 		info.nextSource = source | (sourceRegion << this.BASE_OFFSET);
@@ -799,15 +738,15 @@ class GameBoyAdvanceMMU {
 		this.waitstates32[this.REGION_CART_SRAM] = this.ROM_WS[sram];
 		this.waitstatesSeq32[this.REGION_CART_SRAM] = this.ROM_WS[sram];
 
-		this.waitstates[this.REGION_CART0] = this.waitstates[
-			this.REGION_CART0 + 1
-		] = this.ROM_WS[ws0];
-		this.waitstates[this.REGION_CART1] = this.waitstates[
-			this.REGION_CART1 + 1
-		] = this.ROM_WS[ws1];
-		this.waitstates[this.REGION_CART2] = this.waitstates[
-			this.REGION_CART2 + 1
-		] = this.ROM_WS[ws2];
+		this.waitstates[this.REGION_CART0] = this.waitstates[this.REGION_CART0 + 1] = this.ROM_WS[
+			ws0
+		];
+		this.waitstates[this.REGION_CART1] = this.waitstates[this.REGION_CART1 + 1] = this.ROM_WS[
+			ws1
+		];
+		this.waitstates[this.REGION_CART2] = this.waitstates[this.REGION_CART2 + 1] = this.ROM_WS[
+			ws2
+		];
 
 		this.waitstatesSeq[this.REGION_CART0] = this.waitstatesSeq[
 			this.REGION_CART0 + 1
@@ -819,85 +758,58 @@ class GameBoyAdvanceMMU {
 			this.REGION_CART2 + 1
 		] = this.ROM_WS_SEQ[2][ws2seq];
 
-		this.waitstates32[this.REGION_CART0] = this.waitstates32[
-			this.REGION_CART0 + 1
-		] =
-			this.waitstates[this.REGION_CART0] +
-			1 +
-			this.waitstatesSeq[this.REGION_CART0];
-		this.waitstates32[this.REGION_CART1] = this.waitstates32[
-			this.REGION_CART1 + 1
-		] =
-			this.waitstates[this.REGION_CART1] +
-			1 +
-			this.waitstatesSeq[this.REGION_CART1];
-		this.waitstates32[this.REGION_CART2] = this.waitstates32[
-			this.REGION_CART2 + 1
-		] =
-			this.waitstates[this.REGION_CART2] +
-			1 +
-			this.waitstatesSeq[this.REGION_CART2];
+		this.waitstates32[this.REGION_CART0] = this.waitstates32[this.REGION_CART0 + 1] =
+			this.waitstates[this.REGION_CART0] + 1 + this.waitstatesSeq[this.REGION_CART0];
+		this.waitstates32[this.REGION_CART1] = this.waitstates32[this.REGION_CART1 + 1] =
+			this.waitstates[this.REGION_CART1] + 1 + this.waitstatesSeq[this.REGION_CART1];
+		this.waitstates32[this.REGION_CART2] = this.waitstates32[this.REGION_CART2 + 1] =
+			this.waitstates[this.REGION_CART2] + 1 + this.waitstatesSeq[this.REGION_CART2];
 
-		this.waitstatesSeq32[this.REGION_CART0] = this.waitstatesSeq32[
-			this.REGION_CART0 + 1
-		] = 2 * this.waitstatesSeq[this.REGION_CART0] + 1;
-		this.waitstatesSeq32[this.REGION_CART1] = this.waitstatesSeq32[
-			this.REGION_CART1 + 1
-		] = 2 * this.waitstatesSeq[this.REGION_CART1] + 1;
-		this.waitstatesSeq32[this.REGION_CART2] = this.waitstatesSeq32[
-			this.REGION_CART2 + 1
-		] = 2 * this.waitstatesSeq[this.REGION_CART2] + 1;
+		this.waitstatesSeq32[this.REGION_CART0] = this.waitstatesSeq32[this.REGION_CART0 + 1] =
+			2 * this.waitstatesSeq[this.REGION_CART0] + 1;
+		this.waitstatesSeq32[this.REGION_CART1] = this.waitstatesSeq32[this.REGION_CART1 + 1] =
+			2 * this.waitstatesSeq[this.REGION_CART1] + 1;
+		this.waitstatesSeq32[this.REGION_CART2] = this.waitstatesSeq32[this.REGION_CART2 + 1] =
+			2 * this.waitstatesSeq[this.REGION_CART2] + 1;
 
 		if (prefetch) {
-			this.waitstatesPrefetch[
-				this.REGION_CART0
-			] = this.waitstatesPrefetch[this.REGION_CART0 + 1] = 0;
-			this.waitstatesPrefetch[
-				this.REGION_CART1
-			] = this.waitstatesPrefetch[this.REGION_CART1 + 1] = 0;
-			this.waitstatesPrefetch[
-				this.REGION_CART2
-			] = this.waitstatesPrefetch[this.REGION_CART2 + 1] = 0;
+			this.waitstatesPrefetch[this.REGION_CART0] = this.waitstatesPrefetch[
+				this.REGION_CART0 + 1
+			] = 0;
+			this.waitstatesPrefetch[this.REGION_CART1] = this.waitstatesPrefetch[
+				this.REGION_CART1 + 1
+			] = 0;
+			this.waitstatesPrefetch[this.REGION_CART2] = this.waitstatesPrefetch[
+				this.REGION_CART2 + 1
+			] = 0;
 
-			this.waitstatesPrefetch32[
-				this.REGION_CART0
-			] = this.waitstatesPrefetch32[this.REGION_CART0 + 1] = 0;
-			this.waitstatesPrefetch32[
-				this.REGION_CART1
-			] = this.waitstatesPrefetch32[this.REGION_CART1 + 1] = 0;
-			this.waitstatesPrefetch32[
-				this.REGION_CART2
-			] = this.waitstatesPrefetch32[this.REGION_CART2 + 1] = 0;
+			this.waitstatesPrefetch32[this.REGION_CART0] = this.waitstatesPrefetch32[
+				this.REGION_CART0 + 1
+			] = 0;
+			this.waitstatesPrefetch32[this.REGION_CART1] = this.waitstatesPrefetch32[
+				this.REGION_CART1 + 1
+			] = 0;
+			this.waitstatesPrefetch32[this.REGION_CART2] = this.waitstatesPrefetch32[
+				this.REGION_CART2 + 1
+			] = 0;
 		} else {
-			this.waitstatesPrefetch[
-				this.REGION_CART0
-			] = this.waitstatesPrefetch[
+			this.waitstatesPrefetch[this.REGION_CART0] = this.waitstatesPrefetch[
 				this.REGION_CART0 + 1
 			] = this.waitstatesSeq[this.REGION_CART0];
-			this.waitstatesPrefetch[
-				this.REGION_CART1
-			] = this.waitstatesPrefetch[
+			this.waitstatesPrefetch[this.REGION_CART1] = this.waitstatesPrefetch[
 				this.REGION_CART1 + 1
 			] = this.waitstatesSeq[this.REGION_CART1];
-			this.waitstatesPrefetch[
-				this.REGION_CART2
-			] = this.waitstatesPrefetch[
+			this.waitstatesPrefetch[this.REGION_CART2] = this.waitstatesPrefetch[
 				this.REGION_CART2 + 1
 			] = this.waitstatesSeq[this.REGION_CART2];
 
-			this.waitstatesPrefetch32[
-				this.REGION_CART0
-			] = this.waitstatesPrefetch32[
+			this.waitstatesPrefetch32[this.REGION_CART0] = this.waitstatesPrefetch32[
 				this.REGION_CART0 + 1
 			] = this.waitstatesSeq32[this.REGION_CART0];
-			this.waitstatesPrefetch32[
-				this.REGION_CART1
-			] = this.waitstatesPrefetch32[
+			this.waitstatesPrefetch32[this.REGION_CART1] = this.waitstatesPrefetch32[
 				this.REGION_CART1 + 1
 			] = this.waitstatesSeq32[this.REGION_CART1];
-			this.waitstatesPrefetch32[
-				this.REGION_CART2
-			] = this.waitstatesPrefetch32[
+			this.waitstatesPrefetch32[this.REGION_CART2] = this.waitstatesPrefetch32[
 				this.REGION_CART2 + 1
 			] = this.waitstatesSeq32[this.REGION_CART2];
 		}

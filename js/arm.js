@@ -337,8 +337,7 @@ class ARMCoreArm {
 	constructAddressingMode1ImmediateRotate(immediate, rotate) {
 		var cpu = this.cpu;
 		return function () {
-			cpu.shifterOperand =
-				(immediate >>> rotate) | (immediate << (32 - rotate));
+			cpu.shifterOperand = (immediate >>> rotate) | (immediate << (32 - rotate));
 			cpu.shifterCarryOut = cpu.shifterOperand >> 31;
 		};
 	}
@@ -419,8 +418,7 @@ class ARMCoreArm {
 				cpu.shifterOperand = shiftVal;
 				cpu.shifterCarryOut = cpu.cpsrC;
 			} else if (rotate) {
-				cpu.shifterOperand =
-					(gprs[rm] >>> rotate) | (gprs[rm] << (32 - rotate));
+				cpu.shifterOperand = (gprs[rm] >>> rotate) | (gprs[rm] << (32 - rotate));
 				cpu.shifterCarryOut = shiftVal & (1 << (rotate - 1));
 			} else {
 				cpu.shifterOperand = shiftVal;
@@ -438,17 +436,15 @@ class ARMCoreArm {
 	}
 	constructAddressingMode23Register(instruction, rm, condOp) {
 		var rn = (instruction & 0x000f0000) >> 16;
-		return this.addressingMode23Register[(instruction & 0x01a00000) >> 21](
-			rn,
-			rm,
-			condOp
-		);
+		return this.addressingMode23Register[(instruction & 0x01a00000) >> 21](rn, rm, condOp);
 	}
 	constructAddressingMode2RegisterShifted(instruction, shiftOp, condOp) {
 		var rn = (instruction & 0x000f0000) >> 16;
-		return this.addressingMode2RegisterShifted[
-			(instruction & 0x01a00000) >> 21
-		](rn, shiftOp, condOp);
+		return this.addressingMode2RegisterShifted[(instruction & 0x01a00000) >> 21](
+			rn,
+			shiftOp,
+			condOp
+		);
 	}
 	constructAddressingMode4(immediate, rn) {
 		var cpu = this.cpu;
@@ -677,8 +673,7 @@ class ARMCoreArm {
 			cpu.cpsrZ = !(aluOut & 0xffffffff);
 			cpu.cpsrC = gprs[rn] >>> 0 >= cpu.shifterOperand >>> 0;
 			cpu.cpsrV =
-				gprs[rn] >> 31 != cpu.shifterOperand >> 31 &&
-				gprs[rn] >> 31 != aluOut >> 31;
+				gprs[rn] >> 31 != cpu.shifterOperand >> 31 && gprs[rn] >> 31 != aluOut >> 31;
 		};
 	}
 	constructEOR(rd, rn, shiftOp, condOp) {
@@ -1129,8 +1124,7 @@ class ARMCoreArm {
 				cpu.cpsrZ = !(d & 0xffffffff);
 				cpu.cpsrC = cpu.shifterOperand >>> 0 >= d >>> 0;
 				cpu.cpsrV =
-					cpu.shifterOperand >> 31 != n >> 31 &&
-					cpu.shifterOperand >> 31 != d >> 31;
+					cpu.shifterOperand >> 31 != n >> 31 && cpu.shifterOperand >> 31 != d >> 31;
 			}
 			gprs[rd] = d;
 		};
@@ -1165,9 +1159,7 @@ class ARMCoreArm {
 				cpu.cpsrN = d >> 31;
 				cpu.cpsrZ = !(d & 0xffffffff);
 				cpu.cpsrC = gprs[rn] >>> 0 >= d >>> 0;
-				cpu.cpsrV =
-					gprs[rn] >> 31 != shifterOperand >> 31 &&
-					gprs[rn] >> 31 != d >> 31;
+				cpu.cpsrV = gprs[rn] >> 31 != shifterOperand >> 31 && gprs[rn] >> 31 != d >> 31;
 			}
 			gprs[rd] = d;
 		};
@@ -1363,10 +1355,9 @@ class ARMCoreArm {
 				cpu.unpackCPSR(cpu.spsr);
 			} else {
 				cpu.cpsrN = d >> 31;
-			cpu.cpsrZ = !(d & 0xFFFFFFFF);
-			cpu.cpsrC = (gprs[rn] >>> 0) >= (cpu.shifterOperand >>> 0);
-			cpu.cpsrV = (gprs[rn] >> 31) != (cpu.shifterOperand >> 31) &&
-						(gprs[rn] >> 31) != (d >> 31);
+				cpu.cpsrZ = !(d & 0xffffffff);
+				cpu.cpsrC = gprs[rn] >>> 0 >= cpu.shifterOperand >>> 0;
+				cpu.cpsrV = gprs[rn] >> 31 != cpu.shifterOperand >> 31 && gprs[rn] >> 31 != d >> 31;
 			}
 			gprs[rd] = d;
 		};

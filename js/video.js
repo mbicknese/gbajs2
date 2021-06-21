@@ -2,11 +2,12 @@ class GameBoyAdvanceVideo {
 	constructor() {
 		try {
 			this.renderPath = new GameBoyAdvanceRenderProxy();
-		} catch(err) {
-			console.log("Service worker renderer couldn't load. Save states (not save files) may be glitchy")
+		} catch (err) {
+			console.log(
+				"Service worker renderer couldn't load. Save states (not save files) may be glitchy"
+			);
 			this.renderPath = new GameBoyAdvanceSoftwareRenderer();
 		}
-
 
 		this.CYCLES_PER_PIXEL = 4;
 
@@ -86,18 +87,11 @@ class GameBoyAdvanceVideo {
 		this.renderPath.defrost(frost.renderPath, this.core.decodeBase64);
 	}
 	setBacking(backing) {
-		var pixelData = backing.createImageData(
-			this.HORIZONTAL_PIXELS,
-			this.VERTICAL_PIXELS
-		);
+		var pixelData = backing.createImageData(this.HORIZONTAL_PIXELS, this.VERTICAL_PIXELS);
 		this.context = backing;
 
 		// Clear backing first
-		for (
-			var offset = 0;
-			offset < this.HORIZONTAL_PIXELS * this.VERTICAL_PIXELS * 4;
-
-		) {
+		for (var offset = 0; offset < this.HORIZONTAL_PIXELS * this.VERTICAL_PIXELS * 4; ) {
 			pixelData.data[offset++] = 0xff;
 			pixelData.data[offset++] = 0xff;
 			pixelData.data[offset++] = 0xff;

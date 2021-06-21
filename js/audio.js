@@ -7,19 +7,12 @@ class GameBoyAdvanceAudio {
 			this.bufferSize = 0;
 			this.bufferSize = 4096;
 			this.maxSamples = this.bufferSize << 2;
-			this.buffers = [
-				new Float32Array(this.maxSamples),
-				new Float32Array(this.maxSamples)
-			];
+			this.buffers = [new Float32Array(this.maxSamples), new Float32Array(this.maxSamples)];
 			this.sampleMask = this.maxSamples - 1;
 			if (this.context.createScriptProcessor) {
-				this.jsAudio = this.context.createScriptProcessor(
-					this.bufferSize
-				);
+				this.jsAudio = this.context.createScriptProcessor(this.bufferSize);
 			} else {
-				this.jsAudio = this.context.createJavaScriptNode(
-					this.bufferSize
-				);
+				this.jsAudio = this.context.createJavaScriptNode(this.bufferSize);
 			}
 			this.jsAudio.onaudioprocess = function (e) {
 				self.audioProcess(e);
@@ -173,10 +166,7 @@ class GameBoyAdvanceAudio {
 	}
 	updateTimers() {
 		var cycles = this.cpu.cycles;
-		if (
-			!this.enabled ||
-			(cycles < this.nextEvent && cycles < this.nextSample)
-		) {
+		if (!this.enabled || (cycles < this.nextEvent && cycles < this.nextSample)) {
 			return;
 		}
 
@@ -196,27 +186,19 @@ class GameBoyAdvanceAudio {
 				if (cycles >= this.channel3Next) {
 					if (this.channel3Write) {
 						var sample = this.waveData[this.channel3Pointer >> 1];
-					this.channel3Sample = (((sample >> ((this.channel3Pointer & 1) << 2)) & 0xF) - 0x8) / 8;
-					this.channel3Pointer = (this.channel3Pointer + 1);
-						if (
-							this.channel3Dimension &&
-							this.channel3Pointer >= 64
-						) {
+						this.channel3Sample =
+							(((sample >> ((this.channel3Pointer & 1) << 2)) & 0xf) - 0x8) / 8;
+						this.channel3Pointer = this.channel3Pointer + 1;
+						if (this.channel3Dimension && this.channel3Pointer >= 64) {
 							this.channel3Pointer -= 64;
-						} else if (
-							!this.channel3Bank &&
-							this.channel3Pointer >= 32
-						) {
+						} else if (!this.channel3Bank && this.channel3Pointer >= 32) {
 							this.channel3Pointer -= 32;
 						} else if (this.channel3Pointer >= 64) {
 							this.channel3Pointer -= 32;
 						}
 					}
 					this.channel3Next += this.channel3Interval;
-					if (
-						this.channel3Interval &&
-						this.nextEvent > this.channel3Next
-					) {
+					if (this.channel3Interval && this.nextEvent > this.channel3Next) {
 						this.nextEvent = this.channel3Next;
 					}
 				}
@@ -233,20 +215,15 @@ class GameBoyAdvanceAudio {
 						this.channel4.lfsr >>= 1;
 						var sample = this.channel4.lfsr & 1;
 						this.channel4.lfsr |=
-							(((this.channel4.lfsr >> 1) & 1) ^ sample) <<
-							(this.channel4.width - 1);
+							(((this.channel4.lfsr >> 1) & 1) ^ sample) << (this.channel4.width - 1);
 						this.channel4.next += this.channel4.interval;
-						this.channel4.sample =
-							(sample - 0.5) * 2 * this.channel4.volume;
+						this.channel4.sample = (sample - 0.5) * 2 * this.channel4.volume;
 					}
 					this.updateEnvelope(this.channel4, cycles);
 					if (this.nextEvent > this.channel4.next) {
 						this.nextEvent = this.channel4.next;
 					}
-					if (
-						this.channel4.timed &&
-						this.nextEvent > this.channel4.end
-					) {
+					if (this.channel4.timed && this.nextEvent > this.channel4.end) {
 						this.nextEvent = this.channel4.end;
 					}
 				}
@@ -306,7 +283,7 @@ class GameBoyAdvanceAudio {
 				this.soundRatio = 0.25;
 				break;
 			case 1:
-		this.soundRatio = 0.50;
+				this.soundRatio = 0.5;
 				break;
 			case 2:
 				this.soundRatio = 1;
@@ -356,8 +333,8 @@ class GameBoyAdvanceAudio {
 	writeSquareChannelSweep(channelId, value) {
 		var channel = this.squareChannels[channelId];
 		channel.sweepSteps = value & 0x07;
-	channel.sweepIncrement = (value & 0x08) ? -1 : 1;
-	channel.sweepInterval = ((value >> 4) & 0x7) * this.cpuFrequency / 128;
+		channel.sweepIncrement = value & 0x08 ? -1 : 1;
+		channel.sweepInterval = (((value >> 4) & 0x7) * this.cpuFrequency) / 128;
 		channel.doSweep = !!channel.sweepInterval;
 		channel.nextSweep = this.cpu.cycles + channel.sweepInterval;
 		this.resetSquareChannel(channel);
@@ -401,9 +378,7 @@ class GameBoyAdvanceAudio {
 		}
 
 		if (channel.doSweep && cycles >= channel.nextSweep) {
-			channel.frequency +=
-				channel.sweepIncrement *
-				(channel.frequency >> channel.sweepSteps);
+			channel.frequency += channel.sweepIncrement * (channel.frequency >> channel.sweepSteps);
 			if (channel.frequency < 0) {
 				channel.frequency = 0;
 			} else if (channel.frequency > 2047) {
@@ -411,8 +386,7 @@ class GameBoyAdvanceAudio {
 				channel.playing = false;
 				return;
 			}
-			channel.interval =
-				(this.cpuFrequency * (2048 - channel.frequency)) / 131072;
+			channel.interval = (this.cpuFrequency * (2048 - channel.frequency)) / 131072;
 			channel.nextSweep += channel.sweepInterval;
 		}
 
@@ -452,8 +426,7 @@ class GameBoyAdvanceAudio {
 		}
 	}
 	writeChannel3Hi(value) {
-		this.channel3Length =
-			(this.cpuFrequency * (0x100 - (value & 0xff))) / 256;
+		this.channel3Length = (this.cpuFrequency * (0x100 - (value & 0xff))) / 256;
 		var volume = (value >> 13) & 0x7;
 		switch (volume) {
 			case 0:
@@ -473,8 +446,7 @@ class GameBoyAdvanceAudio {
 		}
 	}
 	writeChannel3X(value) {
-		this.channel3Interval =
-			(this.cpuFrequency * (2048 - (value & 0x7ff))) / 2097152;
+		this.channel3Interval = (this.cpuFrequency * (2048 - (value & 0x7ff))) / 2097152;
 		this.channel3Timed = !!(value & 0x4000);
 		if (this.channel3Write) {
 			this.resetChannel3();
@@ -638,9 +610,7 @@ class GameBoyAdvanceAudio {
 				this.dmaB = number;
 				break;
 			default:
-				this.core.WARN(
-					"Tried to schedule FIFO DMA for non-FIFO destination"
-				);
+				this.core.WARN('Tried to schedule FIFO DMA for non-FIFO destination');
 				break;
 		}
 	}
@@ -673,11 +643,7 @@ class GameBoyAdvanceAudio {
 		}
 
 		if (this.playingChannel3) {
-			sample =
-				this.channel3Sample *
-				this.soundRatio *
-				this.channel3Volume *
-				this.PSG_MAX;
+			sample = this.channel3Sample * this.soundRatio * this.channel3Volume * this.PSG_MAX;
 			if (this.enabledLeft & 0x4) {
 				sampleLeft += sample;
 			}

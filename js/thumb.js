@@ -29,8 +29,7 @@ class ARMCoreThumb {
 			cpu.cpsrN = d >> 31;
 			cpu.cpsrZ = !(d & 0xffffffff);
 			cpu.cpsrC = d > 0xffffffff;
-			cpu.cpsrV =
-				!(gprs[rn] >> 31) && ((gprs[rn] >> 31) ^ d) >> 31 && d >> 31;
+			cpu.cpsrV = !(gprs[rn] >> 31) && ((gprs[rn] >> 31) ^ d) >> 31 && d >> 31;
 			gprs[rd] = d;
 		};
 	}
@@ -43,10 +42,7 @@ class ARMCoreThumb {
 			cpu.cpsrN = d >> 31;
 			cpu.cpsrZ = !(d & 0xffffffff);
 			cpu.cpsrC = d > 0xffffffff;
-			cpu.cpsrV =
-				!(gprs[rn] >> 31) &&
-				(gprs[rn] ^ d) >> 31 &&
-				(immediate ^ d) >> 31;
+			cpu.cpsrV = !(gprs[rn] >> 31) && (gprs[rn] ^ d) >> 31 && (immediate ^ d) >> 31;
 			gprs[rn] = d;
 		};
 	}
@@ -60,9 +56,7 @@ class ARMCoreThumb {
 			cpu.cpsrZ = !(d & 0xffffffff);
 			cpu.cpsrC = d > 0xffffffff;
 			cpu.cpsrV =
-				!((gprs[rn] ^ gprs[rm]) >> 31) &&
-				(gprs[rn] ^ d) >> 31 &&
-				(gprs[rm] ^ d) >> 31;
+				!((gprs[rn] ^ gprs[rm]) >> 31) && (gprs[rn] ^ d) >> 31 && (gprs[rm] ^ d) >> 31;
 			gprs[rd] = d;
 		};
 	}
@@ -262,8 +256,7 @@ class ARMCoreThumb {
 			cpu.cpsrN = aluOut >> 31;
 			cpu.cpsrZ = !(aluOut & 0xffffffff);
 			cpu.cpsrC = gprs[rd] >>> 0 >= gprs[rm] >>> 0;
-			cpu.cpsrV =
-				(gprs[rd] ^ gprs[rm]) >> 31 && (gprs[rd] ^ aluOut) >> 31;
+			cpu.cpsrV = (gprs[rd] ^ gprs[rm]) >> 31 && (gprs[rd] ^ aluOut) >> 31;
 		};
 	}
 	constructEOR(rd, rm) {
@@ -778,8 +771,7 @@ class ARMCoreThumb {
 			cpu.cpsrN = d >> 31;
 			cpu.cpsrZ = !(d & 0xffffffff);
 			cpu.cpsrC = gprs[rn] >>> 0 >= gprs[rm] >>> 0;
-			cpu.cpsrV =
-				gprs[rn] >> 31 != gprs[rm] >> 31 && gprs[rn] >> 31 != d >> 31;
+			cpu.cpsrV = gprs[rn] >> 31 != gprs[rm] >> 31 && gprs[rn] >> 31 != d >> 31;
 			gprs[rd] = d;
 		};
 	}

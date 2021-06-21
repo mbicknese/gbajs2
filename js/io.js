@@ -167,7 +167,7 @@ class GameBoyAdvanceIO {
 		}
 	}
 	load8(offset) {
-		throw "Unimplmeneted unaligned I/O access";
+		throw 'Unimplmeneted unaligned I/O access';
 	}
 	load16(offset) {
 		return (this.loadU16(offset) << 16) >> 16;
@@ -184,9 +184,7 @@ class GameBoyAdvanceIO {
 				return this.loadU16(offset) & 0xffff;
 			case this.JOY_RECV:
 			case this.JOY_TRANS:
-				this.core.STUB(
-					"Unimplemented JOY register read: 0x" + offset.toString(16)
-				);
+				this.core.STUB('Unimplemented JOY register read: 0x' + offset.toString(16));
 				return 0;
 		}
 
@@ -233,9 +231,7 @@ class GameBoyAdvanceIO {
 
 			// Video
 			case this.DISPSTAT:
-				return (
-					this.registers[offset >> 1] | this.video.readDisplayStat()
-				);
+				return this.registers[offset >> 1] | this.video.readDisplayStat();
 			case this.VCOUNT:
 				return this.video.vcount;
 
@@ -254,7 +250,7 @@ class GameBoyAdvanceIO {
 			case this.SOUND4CNT_HI:
 				return this.registers[offset >> 1] & 0x40ff;
 			case this.SOUNDCNT_X:
-				this.core.STUB("Unimplemented sound register read: SOUNDCNT_X");
+				this.core.STUB('Unimplemented sound register read: SOUNDCNT_X');
 				return this.registers[offset >> 1] | 0x0000;
 
 			// Timers
@@ -275,7 +271,7 @@ class GameBoyAdvanceIO {
 				this.keypad.pollGamepads();
 				return this.keypad.currentDown;
 			case this.KEYCNT:
-				this.core.STUB("Unimplemented I/O register read: KEYCNT");
+				this.core.STUB('Unimplemented I/O register read: KEYCNT');
 				return 0;
 
 			case this.BG0HOFS:
@@ -331,15 +327,11 @@ class GameBoyAdvanceIO {
 			case this.FIFO_A_HI:
 			case this.FIFO_B_LO:
 			case this.FIFO_B_HI:
-				this.core.WARN(
-					"Read for write-only register: 0x" + offset.toString(16)
-				);
+				this.core.WARN('Read for write-only register: 0x' + offset.toString(16));
 				return this.core.mmu.badMemory.loadU16(0);
 
 			case this.MOSAIC:
-				this.core.WARN(
-					"Read for write-only register: 0x" + offset.toString(16)
-				);
+				this.core.WARN('Read for write-only register: 0x' + offset.toString(16));
 				return 0;
 
 			case this.SIOMULTI0:
@@ -349,21 +341,15 @@ class GameBoyAdvanceIO {
 				return this.sio.read((offset - this.SIOMULTI0) >> 1);
 
 			case this.SIODATA8:
-				this.core.STUB(
-					"Unimplemented SIO register read: 0x" + offset.toString(16)
-				);
+				this.core.STUB('Unimplemented SIO register read: 0x' + offset.toString(16));
 				return 0;
 			case this.JOYCNT:
 			case this.JOYSTAT:
-				this.core.STUB(
-					"Unimplemented JOY register read: 0x" + offset.toString(16)
-				);
+				this.core.STUB('Unimplemented JOY register read: 0x' + offset.toString(16));
 				return 0;
 
 			default:
-				this.core.WARN(
-					"Bad I/O register read: 0x" + offset.toString(16)
-				);
+				this.core.WARN('Bad I/O register read: 0x' + offset.toString(16));
 				return this.core.mmu.badMemory.loadU16(0);
 		}
 		return this.registers[offset >> 1];
@@ -409,18 +395,18 @@ class GameBoyAdvanceIO {
 			case this.IME:
 				break;
 			case this.SOUNDBIAS | 1:
-				this.STUB_REG("sound", offset);
+				this.STUB_REG('sound', offset);
 				break;
 			case this.HALTCNT:
 				value &= 0x80;
 				if (!value) {
 					this.core.irq.halt();
 				} else {
-					this.core.STUB("Stop");
+					this.core.STUB('Stop');
 				}
 				return;
 			default:
-				this.STUB_REG("8-bit I/O", offset);
+				this.STUB_REG('8-bit I/O', offset);
 				break;
 		}
 
@@ -662,10 +648,7 @@ class GameBoyAdvanceIO {
 			case this.DMA2DAD_LO:
 			case this.DMA3SAD_LO:
 			case this.DMA3DAD_LO:
-				this.store32(
-					offset,
-					(this.registers[(offset >> 1) + 1] << 16) | value
-				);
+				this.store32(offset, (this.registers[(offset >> 1) + 1] << 16) | value);
 				return;
 
 			case this.DMA0SAD_HI:
@@ -676,10 +659,7 @@ class GameBoyAdvanceIO {
 			case this.DMA2DAD_HI:
 			case this.DMA3SAD_HI:
 			case this.DMA3DAD_HI:
-				this.store32(
-					offset - 2,
-					this.registers[(offset >> 1) - 1] | (value << 16)
-				);
+				this.store32(offset - 2, this.registers[(offset >> 1) - 1] | (value << 16));
 				return;
 
 			case this.DMA0CNT_LO:
@@ -750,25 +730,23 @@ class GameBoyAdvanceIO {
 			case this.SIOMULTI2:
 			case this.SIOMULTI3:
 			case this.SIODATA8:
-				this.STUB_REG("SIO", offset);
+				this.STUB_REG('SIO', offset);
 				break;
 			case this.RCNT:
 				this.sio.setMode(
-					((value >> 12) & 0xc) |
-						((this.registers[this.SIOCNT >> 1] >> 12) & 0x3)
+					((value >> 12) & 0xc) | ((this.registers[this.SIOCNT >> 1] >> 12) & 0x3)
 				);
 				this.sio.writeRCNT(value);
 				break;
 			case this.SIOCNT:
 				this.sio.setMode(
-					((value >> 12) & 0x3) |
-						((this.registers[this.RCNT >> 1] >> 12) & 0xc)
+					((value >> 12) & 0x3) | ((this.registers[this.RCNT >> 1] >> 12) & 0xc)
 				);
 				this.sio.writeSIOCNT(value);
 				return;
 			case this.JOYCNT:
 			case this.JOYSTAT:
-				this.STUB_REG("JOY", offset);
+				this.STUB_REG('JOY', offset);
 				break;
 
 			// Misc
@@ -788,7 +766,7 @@ class GameBoyAdvanceIO {
 				this.cpu.irq.masterEnable(value);
 				break;
 			default:
-				this.STUB_REG("I/O", offset);
+				this.STUB_REG('I/O', offset);
 		}
 		this.registers[offset >> 1] = value;
 	}
@@ -847,7 +825,7 @@ class GameBoyAdvanceIO {
 				return;
 			case this.JOY_RECV:
 			case this.JOY_TRANS:
-				this.STUB_REG("JOY", offset);
+				this.STUB_REG('JOY', offset);
 				return;
 			default:
 				this.store16(offset, value & 0xffff);
@@ -860,8 +838,6 @@ class GameBoyAdvanceIO {
 	}
 	invalidatePage(address) {}
 	STUB_REG(type, offset) {
-		this.core.STUB(
-			"Unimplemented " + type + " register write: " + offset.toString(16)
-		);
+		this.core.STUB('Unimplemented ' + type + ' register write: ' + offset.toString(16));
 	}
 }

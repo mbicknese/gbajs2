@@ -210,8 +210,7 @@ class EEPROMSavedata extends MemoryView {
 		if (this.readBitsRemaining < 64) {
 			var step = 63 - this.readBitsRemaining;
 			var data =
-				this.view.getUint8((this.readAddress + step) >> 3, false) >>
-				(0x7 - (step & 0x7));
+				this.view.getUint8((this.readAddress + step) >> 3, false) >> (0x7 - (step & 0x7));
 			if (!this.readBitsRemaining) {
 				this.command = this.COMMAND_NULL;
 			}
@@ -265,8 +264,7 @@ class EEPROMSavedata extends MemoryView {
 				} else {
 					var current = this.view.getUint8(this.writeAddress >> 3);
 					current &= ~(1 << (0x7 - (this.writeAddress & 0x7)));
-					current |=
-						(value & 0x1) << (0x7 - (this.writeAddress & 0x7));
+					current |= (value & 0x1) << (0x7 - (this.writeAddress & 0x7));
 					this.view.setUint8(this.writeAddress >> 3, current);
 					++this.writeAddress;
 				}
