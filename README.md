@@ -4,15 +4,13 @@ gbajs2 -- Community Fork
 gbajs2 is a Game Boy Advance emulator written in Javascript from scratch using HTML5 technologies like Canvas and Web Audio. 
 It is freely licensed and works in any modern browser without plugins.
 
-Use it online! <https://gbajs2.com>
-
 See the [issues page](https://github.com/andychase/gbajs2/issues) for feature suggestions and ways you can help contribute!
 
 Mailing list for general discussion or if you want to just be kept in the loop: https://groups.google.com/forum/#!forum/gbajs2
 
 ## Feature List
 
-* Playable compatibility, see [compatibility](https://github.com/andychase/gbajs2/wiki/Compatibility-List)
+* Playable compatibility, see [compatibility](https://github.com/mbicknese/gbajs2/wiki/Compatibility-List)
 * Acceptable performance on modern browsers
 * Pure javascript, allowing easy API access
 * Realtime clock gamepad support (Pokemon Ruby)
@@ -20,9 +18,11 @@ Mailing list for general discussion or if you want to just be kept in the loop: 
 
 ## License
 Original work by Endrift. Repo: (Archived / No longer maintained) https://github.com/endrift/gbajs
+Continued by Andrew Chase (Development halted)
 
 Copyright © 2012 – 2013, Jeffrey Pfau
 Copyright © 2020, Andrew Chase
+Copyright © 2021, Maarten Bicknese
 
 All rights reserved.
 
