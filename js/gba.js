@@ -1,5 +1,9 @@
 class GameBoyAdvance {
-	constructor() {
+	static SYS_ID = 'com.endrift.gbajs';
+
+	constructor(saveGame) {
+		this.saveGame = saveGame;
+
 		this.LOG_ERROR = 1;
 		this.LOG_WARN = 2;
 		this.LOG_STUB = 4;
@@ -302,18 +306,15 @@ class GameBoyAdvance {
 		}
 	}
 	storeSavedata() {
-		var sram = this.mmu.save;
 		try {
-			var storage = window.localStorage;
-			storage[this.SYS_ID + '.' + this.mmu.cart.code] = this.encodeBase64(sram.view);
+			this.saveGame.save(this.mmu.cart.code, this.encodeBase64(this.mmu.save.view));
 		} catch (e) {
 			this.WARN('Could not store savedata! ' + e);
 		}
 	}
 	retrieveSavedata() {
 		try {
-			var storage = window.localStorage;
-			var data = storage[this.SYS_ID + '.' + this.mmu.cart.code];
+			const data = this.saveGame.load(this.mmu.cart.code);
 			if (data) {
 				this.decodeSavedata(data);
 				return true;
