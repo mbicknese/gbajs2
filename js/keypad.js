@@ -251,7 +251,20 @@ const gamepadMaps = {
 		GAMEPAD_THRESHOLD: 0.2
 	},
 	'Wireless Controller Extended Gamepad': {
-		// Also known as DualShock 4
+		// Dualshock wired
+		GAMEPAD_LEFT: 14,
+		GAMEPAD_UP: 12,
+		GAMEPAD_RIGHT: 15,
+		GAMEPAD_DOWN: 13,
+		GAMEPAD_START: 9,
+		GAMEPAD_SELECT: 8,
+		GAMEPAD_A: 0,
+		GAMEPAD_B: 1,
+		GAMEPAD_L: 4,
+		GAMEPAD_R: 5,
+		GAMEPAD_THRESHOLD: 0.2
+	},
+	'DUALSHOCK 4 Wireless Controller Extended Gamepad': {
 		GAMEPAD_LEFT: 14,
 		GAMEPAD_UP: 12,
 		GAMEPAD_RIGHT: 15,

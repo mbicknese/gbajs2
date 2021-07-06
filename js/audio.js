@@ -600,12 +600,12 @@ class GameBoyAdvanceAudio {
 	}
 	scheduleFIFODma(number, info) {
 		switch (info.dest) {
-			case this.cpu.mmu.BASE_IO | this.cpu.irq.io.FIFO_A_LO:
+			case GameBoyAdvanceMMU.BASE_IO | GameBoyAdvanceIO.FIFO_A_LO:
 				// FIXME: is this needed or a hack?
 				info.dstControl = 2;
 				this.dmaA = number;
 				break;
-			case this.cpu.mmu.BASE_IO | this.cpu.irq.io.FIFO_B_LO:
+			case GameBoyAdvanceMMU.BASE_IO | GameBoyAdvanceIO.FIFO_B_LO:
 				info.dstControl = 2;
 				this.dmaB = number;
 				break;

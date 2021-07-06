@@ -112,17 +112,17 @@ class GameBoyAdvanceRenderProxy {
 		}
 	}
 	clear(mmu) {
-		this.palette = new MemoryProxy(this, mmu.SIZE_PALETTE_RAM, 0);
-		this.vram = new MemoryProxy(this, mmu.SIZE_VRAM, 13);
-		this.oam = new MemoryProxy(this, mmu.SIZE_OAM, 0);
+		this.palette = new MemoryProxy(this, GameBoyAdvanceMMU.SIZE_PALETTE_RAM, 0);
+		this.vram = new MemoryProxy(this, GameBoyAdvanceMMU.SIZE_VRAM, 13);
+		this.oam = new MemoryProxy(this, GameBoyAdvanceMMU.SIZE_OAM, 0);
 
 		this.dirty = null;
 		this.scanlineQueue = [];
 
 		this.worker.postMessage({
 			type: 'clear',
-			SIZE_VRAM: mmu.SIZE_VRAM,
-			SIZE_OAM: mmu.SIZE_OAM
+			SIZE_VRAM: GameBoyAdvanceMMU.SIZE_VRAM,
+			SIZE_OAM: GameBoyAdvanceMMU.SIZE_OAM
 		});
 	}
 	freeze(encodeBase64) {
@@ -234,20 +234,20 @@ class GameBoyAdvanceRenderProxy {
 	clearSubsets(mmu, regions) {
 		this.dirty = this.dirty || {};
 		if (regions & 0x04) {
-			this.palette = new MemoryProxy(this, mmu.SIZE_PALETTE_RAM, 0);
-			mmu.mmap(mmu.REGION_PALETTE_RAM, this.palette);
+			this.palette = new MemoryProxy(this, GameBoyAdvanceMMU.SIZE_PALETTE_RAM, 0);
+			mmu.mmap(GameBoyAdvanceMMU.REGION_PALETTE_RAM, this.palette);
 			this.memoryDirtied(this.palette, 0);
 		}
 		if (regions & 0x08) {
-			this.vram = new MemoryProxy(this, mmu.SIZE_VRAM, 13);
-			mmu.mmap(mmu.REGION_VRAM, this.vram);
+			this.vram = new MemoryProxy(this, GameBoyAdvanceMMU.SIZE_VRAM, 13);
+			mmu.mmap(GameBoyAdvanceMMU.REGION_VRAM, this.vram);
 			for (var i = 0; i < this.vram.blocks.length; ++i) {
 				this.memoryDirtied(this.vram, i);
 			}
 		}
 		if (regions & 0x10) {
-			this.oam = new MemoryProxy(this, mmu.SIZE_OAM, 0);
-			mmu.mmap(mmu.REGION_OAM, this.oam);
+			this.oam = new MemoryProxy(this, GameBoyAdvanceMMU.SIZE_OAM, 0);
+			mmu.mmap(GameBoyAdvanceMMU.REGION_OAM, this.oam);
 			this.memoryDirtied(this.oam, 0);
 		}
 	}

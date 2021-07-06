@@ -271,8 +271,8 @@ class ARMCore {
 		this.cycles = frost.cycles;
 	}
 	fetchPage(address) {
-		var region = address >> this.mmu.BASE_OFFSET;
-		var pageId = this.mmu.addressToPage(region, address & this.mmu.OFFSET_MASK);
+		var region = address >> GameBoyAdvanceMMU.BASE_OFFSET;
+		var pageId = this.mmu.addressToPage(region, address & GameBoyAdvanceMMU.OFFSET_MASK);
 		if (region == this.pageRegion) {
 			if (pageId == this.pageId && !this.page.invalid) {
 				return;

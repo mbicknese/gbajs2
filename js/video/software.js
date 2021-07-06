@@ -40,13 +40,6 @@ class MemoryAligned16 {
 	invalidatePage(address) {}
 }
 
-class GameBoyAdvanceVRAM extends MemoryAligned16 {
-	constructor(size) {
-		super(size);
-		this.vram = this.buffer;
-	}
-}
-
 class GameBoyAdvanceOAM extends MemoryAligned16 {
 	constructor(size) {
 		super(size);
@@ -716,8 +709,8 @@ class GameBoyAdvanceSoftwareRenderer {
 	}
 	clear(mmu) {
 		this.palette = new GameBoyAdvancePalette();
-		this.vram = new GameBoyAdvanceVRAM(mmu.SIZE_VRAM);
-		this.oam = new GameBoyAdvanceOAM(mmu.SIZE_OAM);
+		this.vram = new MemoryAligned16(GameBoyAdvanceMMU.SIZE_VRAM);
+		this.oam = new GameBoyAdvanceOAM(GameBoyAdvanceMMU.SIZE_OAM);
 		this.oam.video = this;
 		this.objLayers = [
 			new GameBoyAdvanceOBJLayer(this, 0),
@@ -869,15 +862,15 @@ class GameBoyAdvanceSoftwareRenderer {
 	}
 	clearSubsets(mmu, regions) {
 		if (regions & 0x04) {
-			this.palette.overwrite(new Uint16Array(mmu.SIZE_PALETTE >> 1));
+			this.palette.overwrite(new Uint16Array(GameBoyAdvanceMMU.SIZE_PALETTE_RAM >> 1));
 		}
 
 		if (regions & 0x08) {
-			this.vram.insert(0, new Uint16Array(mmu.SIZE_VRAM >> 1));
+			this.vram.insert(0, new Uint16Array(GameBoyAdvanceMMU.SIZE_VRAM >> 1));
 		}
 
 		if (regions & 0x10) {
-			this.oam.overwrite(new Uint16Array(mmu.SIZE_OAM >> 1));
+			this.oam.overwrite(new Uint16Array(GameBoyAdvanceMMU.SIZE_OAM >> 1));
 			this.oam.video = this;
 		}
 	}

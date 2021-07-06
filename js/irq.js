@@ -133,7 +133,7 @@ class GameBoyAdvanceInterruptHandler {
 				if (this.cpu.cycles >= timer.nextEvent) {
 					timer.lastEvent = timer.nextEvent;
 					timer.nextEvent += timer.overflowInterval;
-					this.io.registers[this.io.TM0CNT_LO >> 1] = timer.reload;
+					this.io.registers[GameBoyAdvanceIO.TM0CNT_LO >> 1] = timer.reload;
 					timer.oldReload = timer.reload;
 
 					if (timer.doIrq) {
@@ -160,7 +160,7 @@ class GameBoyAdvanceInterruptHandler {
 
 					timer = this.timers[1];
 					if (timer.countUp) {
-						if (++this.io.registers[this.io.TM1CNT_LO >> 1] == 0x10000) {
+						if (++this.io.registers[GameBoyAdvanceIO.TM1CNT_LO >> 1] == 0x10000) {
 							timer.nextEvent = this.cpu.cycles;
 						}
 					}
@@ -172,8 +172,11 @@ class GameBoyAdvanceInterruptHandler {
 				if (this.cpu.cycles >= timer.nextEvent) {
 					timer.lastEvent = timer.nextEvent;
 					timer.nextEvent += timer.overflowInterval;
-					if (!timer.countUp || this.io.registers[this.io.TM1CNT_LO >> 1] == 0x10000) {
-						this.io.registers[this.io.TM1CNT_LO >> 1] = timer.reload;
+					if (
+						!timer.countUp ||
+						this.io.registers[GameBoyAdvanceIO.TM1CNT_LO >> 1] == 0x10000
+					) {
+						this.io.registers[GameBoyAdvanceIO.TM1CNT_LO >> 1] = timer.reload;
 					}
 					timer.oldReload = timer.reload;
 
@@ -205,7 +208,7 @@ class GameBoyAdvanceInterruptHandler {
 
 					timer = this.timers[2];
 					if (timer.countUp) {
-						if (++this.io.registers[this.io.TM2CNT_LO >> 1] == 0x10000) {
+						if (++this.io.registers[GameBoyAdvanceIO.TM2CNT_LO >> 1] == 0x10000) {
 							timer.nextEvent = this.cpu.cycles;
 						}
 					}
@@ -217,8 +220,11 @@ class GameBoyAdvanceInterruptHandler {
 				if (this.cpu.cycles >= timer.nextEvent) {
 					timer.lastEvent = timer.nextEvent;
 					timer.nextEvent += timer.overflowInterval;
-					if (!timer.countUp || this.io.registers[this.io.TM2CNT_LO >> 1] == 0x10000) {
-						this.io.registers[this.io.TM2CNT_LO >> 1] = timer.reload;
+					if (
+						!timer.countUp ||
+						this.io.registers[GameBoyAdvanceIO.TM2CNT_LO >> 1] == 0x10000
+					) {
+						this.io.registers[GameBoyAdvanceIO.TM2CNT_LO >> 1] = timer.reload;
 					}
 					timer.oldReload = timer.reload;
 
@@ -232,7 +238,7 @@ class GameBoyAdvanceInterruptHandler {
 
 					timer = this.timers[3];
 					if (timer.countUp) {
-						if (++this.io.registers[this.io.TM3CNT_LO >> 1] == 0x10000) {
+						if (++this.io.registers[GameBoyAdvanceIO.TM3CNT_LO >> 1] == 0x10000) {
 							timer.nextEvent = this.cpu.cycles;
 						}
 					}
@@ -244,8 +250,11 @@ class GameBoyAdvanceInterruptHandler {
 				if (this.cpu.cycles >= timer.nextEvent) {
 					timer.lastEvent = timer.nextEvent;
 					timer.nextEvent += timer.overflowInterval;
-					if (!timer.countUp || this.io.registers[this.io.TM3CNT_LO >> 1] == 0x10000) {
-						this.io.registers[this.io.TM3CNT_LO >> 1] = timer.reload;
+					if (
+						!timer.countUp ||
+						this.io.registers[GameBoyAdvanceIO.TM3CNT_LO >> 1] == 0x10000
+					) {
+						this.io.registers[GameBoyAdvanceIO.TM3CNT_LO >> 1] = timer.reload;
 					}
 					timer.oldReload = timer.reload;
 
@@ -306,7 +315,7 @@ class GameBoyAdvanceInterruptHandler {
 		switch (opcode) {
 			case 0x00:
 				// SoftReset
-				var mem = this.core.mmu.memory[this.core.mmu.REGION_WORKING_IRAM];
+				var mem = this.core.mmu.memory[GameBoyAdvanceMMU.REGION_WORKING_IRAM];
 				var flag = mem.loadU8(0x7ffa);
 				for (var i = 0x7e00; i < 0x8000; i += 4) {
 					mem.store32(i, 0);
@@ -325,14 +334,14 @@ class GameBoyAdvanceInterruptHandler {
 				// RegisterRamReset
 				var regions = this.cpu.gprs[0];
 				if (regions & 0x01) {
-					this.core.mmu.memory[this.core.mmu.REGION_WORKING_RAM] = new MemoryBlock(
-						this.core.mmu.SIZE_WORKING_RAM,
+					this.core.mmu.memory[GameBoyAdvanceMMU.REGION_WORKING_RAM] = new MemoryBlock(
+						GameBoyAdvanceMMU.SIZE_WORKING_RAM,
 						9
 					);
 				}
 				if (regions & 0x02) {
-					for (var i = 0; i < this.core.mmu.SIZE_WORKING_IRAM - 0x200; i += 4) {
-						this.core.mmu.memory[this.core.mmu.REGION_WORKING_IRAM].store32(i, 0);
+					for (var i = 0; i < GameBoyAdvanceMMU.SIZE_WORKING_IRAM - 0x200; i += 4) {
+						this.core.mmu.memory[GameBoyAdvanceMMU.REGION_WORKING_IRAM].store32(i, 0);
 					}
 				}
 				if (regions & 0x1c) {
@@ -354,7 +363,7 @@ class GameBoyAdvanceInterruptHandler {
 			case 0x04:
 				// IntrWait
 				if (!this.enable) {
-					this.io.store16(this.io.IME, 1);
+					this.io.store16(GameBoyAdvanceIO.IME, 1);
 				}
 				if (!this.cpu.gprs[0] && this.interruptFlags & this.cpu.gprs[1]) {
 					return;
@@ -685,7 +694,7 @@ class GameBoyAdvanceInterruptHandler {
 	}
 	raiseIRQ(irqType) {
 		this.interruptFlags |= 1 << irqType;
-		this.io.registers[this.io.IF >> 1] = this.interruptFlags;
+		this.io.registers[GameBoyAdvanceIO.IF >> 1] = this.interruptFlags;
 
 		if (this.enable && this.enabledIRQs & (1 << irqType)) {
 			this.cpu.raiseIRQ();
@@ -693,7 +702,7 @@ class GameBoyAdvanceInterruptHandler {
 	}
 	dismissIRQs(irqMask) {
 		this.interruptFlags &= ~irqMask;
-		this.io.registers[this.io.IF >> 1] = this.interruptFlags;
+		this.io.registers[GameBoyAdvanceIO.IF >> 1] = this.interruptFlags;
 	}
 	dmaSetSourceAddress(dma, address) {
 		this.dma[dma].source = address & 0xfffffffe;
@@ -761,12 +770,13 @@ class GameBoyAdvanceInterruptHandler {
 			} else {
 				currentTimer.nextEvent = 0;
 			}
-			this.io.registers[(this.io.TM0CNT_LO + (timer << 2)) >> 1] = currentTimer.reload;
+			this.io.registers[(GameBoyAdvanceIO.TM0CNT_LO + (timer << 2)) >> 1] =
+				currentTimer.reload;
 			currentTimer.oldReload = currentTimer.reload;
 			++this.timersEnabled;
 		} else if (wasEnabled && !currentTimer.enable) {
 			if (!currentTimer.countUp) {
-				this.io.registers[(this.io.TM0CNT_LO + (timer << 2)) >> 1] =
+				this.io.registers[(GameBoyAdvanceIO.TM0CNT_LO + (timer << 2)) >> 1] =
 					(currentTimer.oldReload + (this.cpu.cycles - currentTimer.lastEvent)) >>
 					oldPrescale;
 			}
@@ -787,7 +797,7 @@ class GameBoyAdvanceInterruptHandler {
 				currentTimer.prescaleBits
 			);
 		} else {
-			return this.io.registers[(this.io.TM0CNT_LO + (timer << 2)) >> 1];
+			return this.io.registers[(GameBoyAdvanceIO.TM0CNT_LO + (timer << 2)) >> 1];
 		}
 	}
 	halt() {

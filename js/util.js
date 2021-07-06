@@ -1,26 +1,25 @@
-function hex(number, leading, usePrefix) {
-	if (typeof usePrefix === 'undefined') {
-		usePrefix = true;
-	}
-	if (typeof leading === 'undefined') {
-		leading = 8;
-	}
-	var string = (number >>> 0).toString(16).toUpperCase();
-	leading -= string.length;
-	if (leading < 0) return string;
-	return (usePrefix ? '0x' : '') + new Array(leading + 1).join('0') + string;
+/**
+ * @param {number} value
+ * @param {number} [leading]
+ * @param {boolean} [usePrefix]
+ * @returns {string}
+ */
+function hex(value, leading = 8, usePrefix = true) {
+	const asHex = (value >>> 0).toString(16).toUpperCase();
+	leading -= asHex.length;
+	if (leading < 0) return asHex;
+	return (usePrefix ? '0x' : '') + new Array(leading + 1).join('0') + asHex;
 }
 
 class Pointer {
-	constructor() {
-		this.index = 0;
-		this.top = 0;
-		this.stack = [];
-	}
+	index = 0;
+	top = 0;
+	stack = [];
+
 	advance(amount) {
-		var index = this.index;
+		const oldIndex = this.index;
 		this.index += amount;
-		return index;
+		return oldIndex;
 	}
 	mark() {
 		return this.index - this.top;
@@ -32,10 +31,15 @@ class Pointer {
 	pop() {
 		this.top = this.stack.pop();
 	}
+
+	/**
+	 * @param {DataView} view
+	 * @returns {string}
+	 */
 	readString(view) {
-		var length = view.getUint32(this.advance(4), true);
-		var bytes = [];
-		for (var i = 0; i < length; ++i) {
+		const length = view.getUint32(this.advance(4), true);
+		const bytes = [];
+		for (let i = 0; i < length; ++i) {
 			bytes.push(String.fromCharCode(view.getUint8(this.advance(1))));
 		}
 		return bytes.join('');
@@ -43,39 +47,39 @@ class Pointer {
 }
 
 class Serializer {
-	TAG_INT = 1;
-	TAG_STRING = 2;
-	TAG_STRUCT = 3;
-	TAG_BLOB = 4;
-	TAG_BOOLEAN = 5;
-	TYPE = 'application/octet-stream';
+	static TAG_INT = 1;
+	static TAG_STRING = 2;
+	static TAG_STRUCT = 3;
+	static TAG_BLOB = 4;
+	static TAG_BOOLEAN = 5;
+	static TYPE = 'application/octet-stream';
 
-	pack(value) {
-		var object = new DataView(new ArrayBuffer(4));
+	static pack(value) {
+		const object = new DataView(new ArrayBuffer(4));
 		object.setUint32(0, value, true);
 		return object.buffer;
 	}
 
-	pack8(value) {
-		var object = new DataView(new ArrayBuffer(1));
-		object.setUint8(0, value, true);
+	static pack8(value) {
+		const object = new DataView(new ArrayBuffer(1));
+		object.setUint8(0, value);
 		return object.buffer;
 	}
 
-	prefix(value) {
+	static prefix(value) {
 		return new Blob([Serializer.pack(value.size || value.length || value.byteLength), value], {
 			type: Serializer.TYPE
 		});
 	}
 
-	serialize(stream) {
-		var parts = [];
-		var size = 4;
-		for (i in stream) {
+	static serialize(stream) {
+		const parts = [];
+		let size = 4;
+		for (let i in stream) {
 			if (stream.hasOwnProperty(i)) {
-				var tag;
-				var head = Serializer.prefix(i);
-				var body;
+				const head = Serializer.prefix(i);
+				let tag;
+				let body;
 				switch (typeof stream[i]) {
 					case 'number':
 						tag = Serializer.TAG_INT;
@@ -86,7 +90,7 @@ class Serializer {
 						body = Serializer.prefix(stream[i]);
 						break;
 					case 'object':
-						if (stream[i].type == Serializer.TYPE) {
+						if (stream[i].type === Serializer.TYPE) {
 							tag = Serializer.TAG_BLOB;
 							body = stream[i];
 						} else {
@@ -112,22 +116,23 @@ class Serializer {
 		return new Blob(parts);
 	}
 
-	deserialize(blob, callback) {
-		var reader = new FileReader();
+	static deserialize(blob, callback) {
+		const reader = new FileReader();
 		reader.onload = function (data) {
-			callback(Serializer.deserealizeStream(new DataView(data.target.result), new Pointer()));
+			if (!(data.target?.result instanceof ArrayBuffer)) return;
+			callback(Serializer.deserializeStream(new DataView(data.target.result), new Pointer()));
 		};
 		reader.readAsArrayBuffer(blob);
 	}
 
-	deserealizeStream(view, pointer) {
+	static deserializeStream(view, pointer) {
 		pointer.push();
-		var object = {};
-		var remaining = view.getUint32(pointer.advance(4), true);
+		const object = {};
+		const remaining = view.getUint32(pointer.advance(4), true);
 		while (pointer.mark() < remaining) {
-			var tag = view.getUint8(pointer.advance(1));
-			var head = pointer.readString(view);
-			var body;
+			const tag = view.getUint8(pointer.advance(1));
+			const head = pointer.readString(view);
+			let body;
 			switch (tag) {
 				case Serializer.TAG_INT:
 					body = view.getUint32(pointer.advance(4), true);
@@ -136,10 +141,10 @@ class Serializer {
 					body = pointer.readString(view);
 					break;
 				case Serializer.TAG_STRUCT:
-					body = Serializer.deserealizeStream(view, pointer);
+					body = Serializer.deserializeStream(view, pointer);
 					break;
 				case Serializer.TAG_BLOB:
-					var size = view.getUint32(pointer.advance(4), true);
+					const size = view.getUint32(pointer.advance(4), true);
 					body = view.buffer.slice(pointer.advance(size), pointer.advance(0));
 					break;
 				case Serializer.TAG_BOOLEAN:
@@ -155,44 +160,47 @@ class Serializer {
 		return object;
 	}
 
-	serializePNG(blob, base, callback) {
-		var canvas = document.createElement('canvas');
-		var context = canvas.getContext('2d');
-		var pixels = base.getContext('2d').getImageData(0, 0, base.width, base.height);
-		var transparent = 0;
-		for (var y = 0; y < base.height; ++y) {
-			for (var x = 0; x < base.width; ++x) {
+	static serializePNG(blob, base, callback) {
+		const canvas = document.createElement('canvas');
+		const context = canvas.getContext('2d');
+		const pixels = base.getContext('2d').getImageData(0, 0, base.width, base.height);
+		let transparent = 0;
+		for (let y = 0; y < base.height; ++y) {
+			for (let x = 0; x < base.width; ++x) {
 				if (!pixels.data[(x + y * base.width) * 4 + 3]) {
 					++transparent;
 				}
 			}
 		}
-		var bytesInCanvas = transparent * 3 + (base.width * base.height - transparent);
-		for (var multiplier = 1; bytesInCanvas * multiplier * multiplier < blob.size; ++multiplier);
-		var edges = bytesInCanvas * multiplier * multiplier - blob.size;
-		var padding = Math.ceil(edges / (base.width * multiplier));
-		canvas.setAttribute('width', base.width * multiplier);
-		canvas.setAttribute('height', base.height * multiplier + padding);
+		const bytesInCanvas = transparent * 3 + (base.width * base.height - transparent);
+		// TODO discover what's going on here
+		let multiplier = 1;
+		for (multiplier; bytesInCanvas * multiplier * multiplier < blob.size; ++multiplier);
+		const edges = bytesInCanvas * multiplier * multiplier - blob.size;
+		const padding = Math.ceil(edges / (base.width * multiplier));
+		canvas.setAttribute('width', (base.width * multiplier).toString());
+		canvas.setAttribute('height', (base.height * multiplier + padding).toString());
 
-		var reader = new FileReader();
+		const reader = new FileReader();
 		reader.onload = function (data) {
-			var view = new Uint8Array(data.target.result);
-			var pointer = 0;
-			var pixelPointer = 0;
-			var newPixels = context.createImageData(canvas.width, canvas.height + padding);
-			for (var y = 0; y < canvas.height; ++y) {
-				for (var x = 0; x < canvas.width; ++x) {
-					var oldY = (y / multiplier) | 0;
-					var oldX = (x / multiplier) | 0;
+			if (!(data.target?.result instanceof ArrayBuffer)) return;
+			const view = new Uint8Array(data.target.result);
+			const newPixels = context.createImageData(canvas.width, canvas.height + padding);
+			let pointer = 0;
+			let pixelPointer = 0;
+			for (let y = 0; y < canvas.height; ++y) {
+				for (let x = 0; x < canvas.width; ++x) {
+					const oldY = (y / multiplier) | 0;
+					const oldX = (x / multiplier) | 0;
 					if (oldY > base.height || !pixels.data[(oldX + oldY * base.width) * 4 + 3]) {
 						newPixels.data[pixelPointer++] = view[pointer++];
 						newPixels.data[pixelPointer++] = view[pointer++];
 						newPixels.data[pixelPointer++] = view[pointer++];
 						newPixels.data[pixelPointer++] = 0;
 					} else {
-						var byte = view[pointer++];
+						const byte = view[pointer++];
 						newPixels.data[pixelPointer++] =
-							pixels.data[(oldX + oldY * base.width) * 4 + 0] | (byte & 7);
+							pixels.data[(oldX + oldY * base.width) * 4] | (byte & 7);
 						newPixels.data[pixelPointer++] =
 							pixels.data[(oldX + oldY * base.width) * 4 + 1] | ((byte >> 3) & 7);
 						newPixels.data[pixelPointer++] =
@@ -209,36 +217,37 @@ class Serializer {
 		return canvas;
 	}
 
-	deserializePNG(blob, callback) {
-		var reader = new FileReader();
-		reader.onload = function (data) {
-			var image = document.createElement('img');
-			image.setAttribute('src', data.target.result);
-			var canvas = document.createElement('canvas');
-			canvas.setAttribute('height', image.height);
-			canvas.setAttribute('width', image.width);
-			var context = canvas.getContext('2d');
+	static deserializePNG(blob, callback) {
+		const reader = new FileReader();
+		reader.onload = function (fileReader) {
+			if (typeof fileReader.target.result !== 'string') return;
+			const image = document.createElement('img');
+			image.setAttribute('src', fileReader.target.result);
+			const canvas = document.createElement('canvas');
+			canvas.setAttribute('height', image.height.toString());
+			canvas.setAttribute('width', image.width.toString());
+			const context = canvas.getContext('2d');
 			context.drawImage(image, 0, 0);
-			var pixels = context.getImageData(0, 0, canvas.width, canvas.height);
-			var data = [];
-			for (var y = 0; y < canvas.height; ++y) {
-				for (var x = 0; x < canvas.width; ++x) {
+			const pixels = context.getImageData(0, 0, canvas.width, canvas.height);
+			let data = [];
+			for (let y = 0; y < canvas.height; ++y) {
+				for (let x = 0; x < canvas.width; ++x) {
 					if (!pixels.data[(x + y * canvas.width) * 4 + 3]) {
-						data.push(pixels.data[(x + y * canvas.width) * 4 + 0]);
+						data.push(pixels.data[(x + y * canvas.width) * 4]);
 						data.push(pixels.data[(x + y * canvas.width) * 4 + 1]);
 						data.push(pixels.data[(x + y * canvas.width) * 4 + 2]);
 					} else {
-						var byte = 0;
-						byte |= pixels.data[(x + y * canvas.width) * 4 + 0] & 7;
+						let byte = 0;
+						byte |= pixels.data[(x + y * canvas.width) * 4] & 7;
 						byte |= (pixels.data[(x + y * canvas.width) * 4 + 1] & 7) << 3;
 						byte |= (pixels.data[(x + y * canvas.width) * 4 + 2] & 7) << 6;
 						data.push(byte);
 					}
 				}
 			}
-			newBlob = new Blob(
+			const newBlob = new Blob(
 				data.map(function (byte) {
-					var array = new Uint8Array(1);
+					const array = new Uint8Array(1);
 					array[0] = byte;
 					return array;
 				}),
